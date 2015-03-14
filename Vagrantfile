@@ -14,6 +14,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     path: "provision/run.sh"
 
   config.vm.network :forwarded_port, host: 8888, guest: 8000
+  config.vm.network :forwarded_port, host: 5432, guest: 5432
 
   config.vm.provider "virtualbox" do |v|
     v.memory = 1600

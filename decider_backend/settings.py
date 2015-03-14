@@ -62,8 +62,12 @@ WSGI_APPLICATION = 'decider_backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'decider_db',
+        'USER': 'decider_db_user',
+        'PASSWORD': 'decider_db_pass',
+        'HOST': 'localhost',
+        'PORT': ''
     }
 }
 
@@ -72,7 +76,7 @@ DATABASES = {
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
