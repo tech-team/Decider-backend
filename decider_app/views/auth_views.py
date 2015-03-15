@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
+from django.template.context_processors import csrf
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
@@ -12,15 +13,18 @@ from decider_app.models import User
 
 @require_http_methods(['GET'])
 def login_view(request):
-    return render(request, 'login.html')
+    c = {}
+    c.update(csrf(request))
+    return render(request, 'login.html', c)
 
 
 @require_http_methods(['GET'])
 def registration_view(request):
-    return render(request, 'registration.html')
+    c = {}
+    c.update(csrf(request))
+    return render(request, 'registration.html', c)
 
 
-@csrf_exempt
 @require_http_methods(['POST'])
 def submit_login(request):
     email = request.POST.get('email')
@@ -36,7 +40,6 @@ def submit_login(request):
         return HttpResponse(json.dumps({"status": "ERROR", "error": u"Мало данных"}), content_type="application/json")
 
 
-@csrf_exempt
 @require_http_methods(['POST'])
 def submit_registration(request):
     username = request.POST.get('username')

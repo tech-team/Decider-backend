@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
     <div class="container">
-        <form id="login-form" class="form-horizontal form-signin form-login" action="#">
+        <form id="login-form" class="form-horizontal form-signin form-login" action="#">{% csrf_token %}
             <h2 class="form-signin-heading">Семён, залогиньтесь</h2>
             <div class="form-group">
                 <label for="inputEmail" class="sr-only">Email</label>

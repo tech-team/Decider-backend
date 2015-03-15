@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
     <div class="container">
-        <form id="reg-form" method="post" class="form-signin form-reg">
+        <form id="reg-form" method="post" class="form-signin form-reg">{% csrf_token %}
             <h2 class="form-signin-heading">Регистрация</h2>
             <div class="form-group">
                 <label for="inputEmail" class="sr-only">Email</label>
