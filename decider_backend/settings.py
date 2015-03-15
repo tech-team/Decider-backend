@@ -10,8 +10,9 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+APP_NAME = 'decider_app'
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-
+APP_DIR = os.path.join(BASE_DIR, APP_NAME)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
@@ -89,10 +90,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = os.path.join(APP_DIR, '/static/')
 
 TEMPLATE_DIRS = (
     os.path.join(BASE_DIR,  'templates'),
 )
 
 CORS_ORIGIN_ALLOW_ALL = True if DEBUG else False
+
+LOGIN_URL = "/login/"
