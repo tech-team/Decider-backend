@@ -26,8 +26,21 @@ class MyUserManager(BaseUserManager):
                                  **extra_fields)
 
     def create_superuser(self, username, email, password, **extra_fields):
-        return self._create_user(username, email, password, True, True,
-                                 **extra_fields)
+        return self._create_user(username, email, password,
+                                 True, True, **extra_fields)
+
+
+class Country(models.Model):
+    class Meta:
+        verbose_name = _(u'Страна')
+        verbose_name_plural = _(u'Страны')
+        ordering = ('name', )
+        db_table = "country"
+
+    name = models.CharField(max_length=100, verbose_name=u'Название')
+
+    def __unicode__(self):
+        return self.name
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -35,10 +48,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = MyUserManager()
 
     USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']
 
     class Meta:
-        verbose_name = _('user')
-        verbose_name_plural = _('users')
+        verbose_name = _(u'Пользователь')
+        verbose_name_plural = _(u'Пользователи')
         ordering = ('-date_joined', )
         db_table = "user"
 
@@ -56,7 +70,7 @@ class User(AbstractBaseUser, PermissionsMixin):
                                     help_text=_('Designates whether this user should be treated as '
                                                 'active. Unselect this instead of deleting accounts.'))
 
-    date_joined = models.DateTimeField(_('date joined'), default=timezone.now())
+    date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
 
     birthday = models.DateField(_(u'День рождения'), blank=True, null=True)
 
@@ -78,19 +92,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         return full_name.strip()
 
 
-class Country(models.Model):
-    class Meta:
-        verbose_name = _(u'Страна')
-        verbose_name_plural = _(u'Страны')
-        ordering = ('name', )
-        db_table = "country"
-
-    name = models.CharField(max_length=100, verbose_name=u'Название')
-
-    def __unicode__(self):
-        return self.name
-
-
 class Question(models.Model):
     class Meta:
         verbose_name = _(u'Вопрос')
@@ -100,7 +101,7 @@ class Question(models.Model):
 
     text = models.TextField(_(u'Текст вопроса'), max_length=500, blank=True, default='')
     is_closed = models.BooleanField(_(u'Закрыт?'), default=False)
-    creation_date = models.DateTimeField(_(u'Дата создания'), default=timezone.now())
+    creation_date = models.DateTimeField(_(u'Дата создания'), default=timezone.now)
 
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     likes = models.ManyToManyField(User, related_name="liked_questions")
@@ -116,7 +117,7 @@ class Comment(models.Model):
         db_table = "comment"
 
     text = models.TextField(_(u'Текст комментария'), max_length=1000, blank=True, default='')
-    creation_date = models.DateTimeField(_(u'Дата создания'), default=timezone.now())
+    creation_date = models.DateTimeField(_(u'Дата создания'), default=timezone.now)
 
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     likes = models.ManyToManyField(User, related_name="liked_comments", through="CommentLike")

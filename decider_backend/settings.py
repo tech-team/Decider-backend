@@ -62,7 +62,7 @@ WSGI_APPLICATION = 'decider_backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'decider_db',
         'USER': 'decider_db_user',
         'PASSWORD': 'decider_db_pass',
@@ -71,6 +71,7 @@ DATABASES = {
     }
 }
 
+AUTH_USER_MODEL = 'decider_app.User'
 # Internationalization
 # https://docs.djangoproject.com/en/1.7/topics/i18n/
 
