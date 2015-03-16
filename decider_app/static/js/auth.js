@@ -12,7 +12,7 @@ function addLoginFormHandler() {
         $.post('/submit_login/', serializedData)
             .done(function(data) {
                 if(data.status == 'OK') {
-                    window.location.replace("/")
+                    // window.location.replace("/")
                 }
                 else {
                     error_span.html(data.error);
@@ -35,7 +35,7 @@ function addRegFormHandler() {
         $.post('/submit_registration/', serializedData)
             .done(function(data) {
                 if(data.status == 'OK') {
-                    window.location.replace("/")
+                    // window.location.replace("/")
                 }
                 else {
                     error_span.html(data.error);
