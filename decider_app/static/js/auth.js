@@ -9,7 +9,7 @@ function addLoginFormHandler() {
         var serializedData = $(this).serialize();
         var error_span = $("#auth-error");
 
-        $.post('/submit_login/', serializedData)
+        $.post('/api/v1/login/', serializedData)
             .done(function(data) {
                 if(data.status == 'OK') {
                     // window.location.replace("/")
@@ -32,7 +32,7 @@ function addRegFormHandler() {
         var serializedData = $(this).serialize();
         var error_span = $("#auth-error");
 
-        $.post('/submit_registration/', serializedData)
+        $.post('/api/v1/registration/', serializedData)
             .done(function(data) {
                 if(data.status == 'OK') {
                     // window.location.replace("/")
