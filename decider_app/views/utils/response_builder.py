@@ -34,6 +34,16 @@ def build_403_response(error_text):
     })
 
 
+def build_404_response(error_text, msg=None, http_code=404):
+    return JsonResponse({
+        'status': 404,
+        'msg': msg if msg else 'user not found',
+        'data': {
+            'error_text': error_text
+        }
+    }, status=http_code)
+
+
 def build_501_response(error_text):
     return JsonResponse({
         'status': 501,
@@ -42,3 +52,5 @@ def build_501_response(error_text):
             'error_text': error_text
         }
     })
+
+
