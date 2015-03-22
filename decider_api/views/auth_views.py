@@ -1,21 +1,19 @@
 # coding=utf-8
 from django.contrib.auth import authenticate, logout
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
-from django.shortcuts import render, redirect
-from django.template.context_processors import csrf
+from django.shortcuts import redirect
 from django.views.decorators.http import require_http_methods
 
 import json
 import requests
 from decider_app.models import User
-from decider_app.views.utils.auth_helper import build_token_request_data
-from decider_app.views.utils.response_builder import TOKEN_URL, build_ok_response, build_403_response, \
-    build_402_response, build_501_response
+from decider_app.views.utils.auth_helper import build_token_request_data, get_token_url
+from decider_app.views.utils.response_builder import build_ok_response, build_403_response, \
+    build_402_response, build_501_response, build_404_response
 
 
 @require_http_methods(['POST'])
-def submit_login(request):
+def login(request):
     email = request.POST.get('email')
     password = request.POST.get('password')
     if email and password:
@@ -25,7 +23,13 @@ def submit_login(request):
             return build_402_response(error_text)
         else:
             post_data = build_token_request_data(email, password)
-            token_data = json.loads(requests.post(TOKEN_URL, data=post_data).content)
+            token_response = requests.post(get_token_url(), data=post_data)
+            try:
+                token_data = json.loads(token_response.content)
+            except ValueError:
+                error_text = 'No token'
+                return build_404_response(error_text, 'Could not receive token', 404)
+
             data = {
                 'access_token': token_data.get('access_token'),
                 'expires': token_data.get('expires_in'),
@@ -38,7 +42,7 @@ def submit_login(request):
 
 
 @require_http_methods(['POST'])
-def submit_registration(request):
+def registration(request):
     username = request.POST.get('username')
     email = request.POST.get('email')
     password = request.POST.get('password')
@@ -54,7 +58,7 @@ def submit_registration(request):
             user.save()
 
             post_data = build_token_request_data(email, password)
-            token_data = json.loads(requests.post(TOKEN_URL, data=post_data).content)
+            token_data = json.loads(requests.post(get_token_url(), data=post_data).content)
 
             if not token_data.get('error'):
                 data = {

@@ -1,9 +1,4 @@
-import json
-import urlparse
 from django.http import JsonResponse
-from decider_backend.settings import HOST_SCHEMA, HOST_ADDRESS, HOST_PORT
-
-TOKEN_URL = urlparse.urlunparse((HOST_SCHEMA, HOST_ADDRESS + ':' + HOST_PORT, '/o/token/', '', '', ''))
 
 
 def build_ok_response(data):

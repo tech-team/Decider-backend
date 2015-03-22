@@ -1,9 +1,7 @@
-import json
-from django.http import HttpResponse, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from oauth2_provider.views import ProtectedResourceView
 from decider_app.models import User
 from decider_app.views.utils.response_builder import build_ok_response, build_404_response
+
 
 
 class UserDataEndpoint(ProtectedResourceView):

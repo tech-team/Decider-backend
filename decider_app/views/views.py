@@ -8,6 +8,12 @@ from django.views.decorators.http import require_http_methods
 def index_view(request):
     return render(request, "index.html")
 
+
+@require_http_methods(['GET'])
+def vk_login_view(request):
+    return render(request, 'vk_login.html')
+
+
 @require_http_methods(['GET'])
 def login_view(request):
     c = {}
