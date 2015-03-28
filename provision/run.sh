@@ -49,7 +49,7 @@ then
   echo "To run system updates manually login via 'vagrant ssh' and run 'apt-get update && apt-get upgrade'"
   echo ""
   print_db_usage
-  exit
+  # exit
 fi
 
 PG_REPO_APT_SOURCE=/etc/apt/sources.list.d/pgdg.list
@@ -67,7 +67,11 @@ fi
 sudo apt-get update
 sudo apt-get -y upgrade
 
-sudo apt-get -y install "postgresql-$PG_VERSION" "postgresql-contrib-$PG_VERSION" pgadmin3
+sudo apt-get -y install "postgresql-$PG_VERSION" \
+                        "postgresql-contrib-$PG_VERSION" \
+                         pgadmin3 \
+                        "postgresql-server-dev-$PG_VERSION" \
+                         libpq-dev
 
 export PG_CONF="/etc/postgresql/$PG_VERSION/main/postgresql.conf"
 export PG_HBA="/etc/postgresql/$PG_VERSION/main/pg_hba.conf"
@@ -118,6 +122,8 @@ sudo pip install virtualenv
 
 virtualenv ${HOME}/decider-backend/env/
 ${HOME}/decider-backend/env/bin/pip install -Ur ${HOME}/decider-backend/requirements.txt
+
+echo ". /home/vagrant/decider-backend/env/bin/activate" >> ${HOME}/.bashrc
 
 #if [ ${TRAVIS} == true ]; then
 #	echo "TRAVIS"
