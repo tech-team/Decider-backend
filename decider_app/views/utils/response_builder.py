@@ -1,6 +1,33 @@
 from django.http import JsonResponse
+from decider_app.views.utils.response_codes import CODE_OK, CODE_CREATED
 
 
+def build_error_response(status, code, msg, errors=None):
+
+    resp_dict = {
+        "status": "error",
+        "code": code,
+        "msg": msg,
+        "errors": errors if errors else []
+    }
+
+    return JsonResponse(resp_dict, status=status)
+
+
+def build_response(status, code=CODE_OK, msg="ok", data=None):
+
+    resp_dict = {
+        "status": "ok",
+        "code": code,
+        "msg": msg
+    }
+    if data:
+        resp_dict["data"] = data
+
+    return JsonResponse(resp_dict, status=status)
+
+
+# TODO: get rid of these responses
 def build_ok_response(data):
     return JsonResponse({
         'status': 200,

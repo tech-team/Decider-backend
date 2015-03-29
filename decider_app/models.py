@@ -30,6 +30,7 @@ class MyUserManager(BaseUserManager):
                                  True, True, **extra_fields)
 
 
+
 class Country(models.Model):
     class Meta:
         verbose_name = _(u'Страна')
@@ -92,6 +93,18 @@ class User(AbstractBaseUser, PermissionsMixin):
         return full_name.strip()
 
 
+class Category(models.Model):
+    class Meta:
+        verbose_name = _(u'Категория')
+        verbose_name_plural = _(u'Категории')
+        db_table = "category"
+
+    name = models.CharField(_(u'Название'), max_length=50)
+
+    def __unicode__(self):
+        return self.name
+
+
 class Question(models.Model):
     class Meta:
         verbose_name = _(u'Вопрос')
@@ -101,10 +114,12 @@ class Question(models.Model):
 
     text = models.TextField(_(u'Текст вопроса'), max_length=500, blank=True, default='')
     is_closed = models.BooleanField(_(u'Закрыт?'), default=False)
+    is_anonymous = models.BooleanField(_(u'Анонимен?'), default=False)
     creation_date = models.DateTimeField(_(u'Дата создания'), default=timezone.now)
 
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     likes = models.ManyToManyField(User, related_name="liked_questions")
+    category = models.ForeignKey(Category, null=True, on_delete=models.SET_NULL)
 
     def __unicode__(self):
         return "Question #" + str(self.id) + " by " + self.author.email
