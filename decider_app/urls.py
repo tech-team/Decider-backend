@@ -1,4 +1,5 @@
 from django.conf.urls import patterns, url
+from decider_api.views import page_views
 
 from decider_app.views import views
 
