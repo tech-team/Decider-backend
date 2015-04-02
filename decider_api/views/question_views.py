@@ -41,9 +41,13 @@ class QuestionsEndpoint(ProtectedResourceView):
                 return build_error_response(httplib.BAD_REQUEST, CODE_UNKNOWN_CATEGORY,
                                             "Some parameters are invalid", errors)
 
-            print(tab_func(user_id=request.resource_owner.id,
-                           limit=limit,
-                           offset=offset))
+            questions = tab_func(user_id=request.resource_owner.id,
+                                 limit=limit,
+                                 offset=offset)
+            extra_fields = {'count': len(questions)}
+            # TODO: format questions
+            return build_response(httplib.OK, CODE_OK, "Successfully fetched questions",
+                                  questions, extra_fields)
 
         except Exception as e:
             print(e.message)

@@ -5,6 +5,8 @@ from decider_app.models import *
 
 def truncate_all():
     Question.objects.all().delete()
+    Comment.objects.all().delete()
+    CommentLike.objects.all().delete()
     Country.objects.all().delete()
     Category.objects.all().delete()
     Picture.objects.all().delete()
@@ -32,11 +34,20 @@ def fill_db(request):
         user1 = User.objects.create(username="snake", email="snake@snake.snake", country=country1)
         user1.set_password("snake")
         user1.save()
+    try:
+        user2 = User.objects.get(email="aaa@aaa.aaa")
+    except User.DoesNotExist:
+        user2 = User.objects.create(username="aaa", email="aaa@aaa.aaa", country=country1)
+        user2.set_password("aaa")
+        user2.save()
 
     q1 = Question.objects.create(text="Question1", author=user1, category=cat1)
     q2 = Question.objects.create(text="Question2", author=user1, category=cat2)
+    q3 = Question.objects.create(text="Question3", author=admin_user, category=cat2)
 
-    q2.likes.add(user1)
+    q1.likes.add(user1)
+    q1.likes.add(admin_user)
+    q1.likes.add(user2)
     q2.likes.add(admin_user)
 
     poll1 = Poll.objects.create(question=q1)
@@ -50,5 +61,6 @@ def fill_db(request):
 
     comm1 = Comment.objects.create(question=q1, author=user1, text="hallo")
     comm2 = Comment.objects.create(question=q1, author=admin_user, text="auf wiedersehen")
+    comm3 = Comment.objects.create(question=q3, author=admin_user, text="auf wiedersehen")
 
     return JsonResponse({"status": "ok"}, status=201)

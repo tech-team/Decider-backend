@@ -14,15 +14,18 @@ def build_error_response(status, code, msg, errors=None):
     return JsonResponse(resp_dict, status=status)
 
 
-def build_response(status, code=CODE_OK, msg="ok", data=None):
+def build_response(status, code=CODE_OK, msg="ok", data=None, extra_fields=None):
 
     resp_dict = {
         "status": "ok",
         "code": code,
         "msg": msg
     }
-    if data:
+    if data is not None:
         resp_dict["data"] = data
+    if extra_fields is not None:
+        for field in extra_fields:
+            resp_dict[field] = extra_fields[field]
 
     return JsonResponse(resp_dict, status=status)
 
