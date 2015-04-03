@@ -1,10 +1,11 @@
 import httplib
 import json
+from django.db import transaction
 from oauth2_provider.views import ProtectedResourceView
 from decider_api.db.poll_items import get_poll_items
 from decider_api.db.questions import tab_switch
 from decider_api.utils.endpoint_decorators import require_post_data, require_get_params
-from decider_app.models import Question, Category, User, Poll, PollItem
+from decider_app.models import Question, Category, User, Poll, PollItem, Picture
 from decider_app.views.utils.response_builder import build_response, build_error_response
 from decider_app.views.utils.response_codes import *
 
@@ -100,6 +101,7 @@ class QuestionsEndpoint(ProtectedResourceView):
             # TODO: write to log
             return build_error_response(httplib.BAD_REQUEST, CODE_INVALID_DATA, "Failed to list questions")
 
+    @transaction.atomic
     @require_post_data(['text', 'poll', 'category_id'])
     def post(self, request, *args, **kwargs):
         try:
@@ -128,25 +130,29 @@ class QuestionsEndpoint(ProtectedResourceView):
 
             question = Question.objects.create(text=text, category=category, is_anonymous=is_anonymous,
                                                author=request.resource_owner)
-            question_poll = Poll.objects.create(question=question)
+            question_poll = Poll.objects.create(question=question, items_count=len(poll))
 
             data_poll = []
             for poll_item in poll:
                 text = poll_item.get('text')
-                # picture = ""
-                # TODO: get image from poll_item.image
+                try:
+                    picture = Picture.objects.get(uid=poll_item.get('picture'))
+                except Picture.DoesNotExist:
+                    picture = None
+                except Exception as e:
+                    print(e)  # TODO: write error
+                    picture = None
 
                 if not text:
                     return build_error_response(httplib.BAD_REQUEST, CODE_UNKNOWN_CATEGORY,
                                                 "Some fields are invalid", ["poll_item.text"])
 
                 pi = PollItem.objects.create(poll=question_poll, question=question,
-                                             text=poll_item['text'])  # TODO: picture
+                                             text=poll_item['text'], picture=picture)  # TODO: picture
                 data_poll.append({
                     'id': pi.id,
                     'text': pi.text,
-                    # 'image_uid': pi.picture.uid
-                    # TODO: picture
+                    'image_url': pi.picture.url if pi.picture else None
                 })
 
             author = {
@@ -154,9 +160,12 @@ class QuestionsEndpoint(ProtectedResourceView):
                 "username": request.resource_owner.username,
                 "last_name": request.resource_owner.last_name,
                 "first_name": request.resource_owner.first_name,
-                # "avatar": request.resource_owner.avatar_url
-                # TODO: avatar
+                "middle_name": request.resource_owner.middle_name
             }
+            if request.resource_owner.avatar:
+                author['avatar'] = request.resource_owner.avatar.url
+            else:
+                author['avatar'] = None
 
             data = {
                 "id": question.id,
