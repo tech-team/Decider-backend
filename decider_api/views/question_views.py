@@ -1,6 +1,7 @@
 import httplib
 import json
 from oauth2_provider.views import ProtectedResourceView
+from decider_api.db.poll_items import get_poll_items
 from decider_api.db.questions import tab_switch
 from decider_api.utils.endpoint_decorators import require_post_data, require_get_params
 from decider_app.models import Question, Category, User, Poll, PollItem
@@ -41,9 +42,54 @@ class QuestionsEndpoint(ProtectedResourceView):
                 return build_error_response(httplib.BAD_REQUEST, CODE_UNKNOWN_CATEGORY,
                                             "Some parameters are invalid", errors)
 
-            questions = tab_func(user_id=request.resource_owner.id,
-                                 limit=limit,
-                                 offset=offset)
+            question_list, q_columns = tab_func(user_id=request.resource_owner.id,
+                                                limit=limit,
+                                                offset=offset)
+            questions = []
+            polls = []
+            for question_row in question_list:
+                poll_id = question_row[q_columns.index('poll_id')]
+                if poll_id:
+                    polls.append(poll_id)
+
+            poll_items_list, pi_columns = get_poll_items(polls)
+
+            poll_items = {}
+            for poll_item_row in poll_items_list:
+                q_id = poll_item_row[pi_columns.index('question_id')]
+                pi = {
+                    'id': poll_item_row[pi_columns.index('id')],
+                    'text': poll_item_row[pi_columns.index('text')],
+                    'image_url': poll_item_row[pi_columns.index('image_url')],
+                    'votes_count': poll_item_row[pi_columns.index('votes_count')]
+                }
+
+                if not poll_items.get(q_id):
+                    poll_items[q_id] = []
+                poll_items[q_id].append(pi)
+
+            for question_row in question_list:
+                question = {
+                    'id': question_row[q_columns.index('id')],
+                    'text': question_row[q_columns.index('text')],
+                    'creation_date': question_row[q_columns.index('creation_date')],
+                    'category_id': question_row[q_columns.index('category_id')],
+                    'likes_count': question_row[q_columns.index('likes_count')],
+                    'comments_count': question_row[q_columns.index('comments_count')],
+                    'author': {
+                        'id': question_row[q_columns.index('author_id')],
+                        'username': question_row[q_columns.index('username')],
+                        'first_name': question_row[q_columns.index('first_name')],
+                        'last_name': question_row[q_columns.index('last_name')],
+                        'middle_name': question_row[q_columns.index('middle_name')],
+                        'avatar': question_row[q_columns.index('image_url')]
+                    },
+                    'poll': poll_items.get(question_row[q_columns.index('id')]),
+                    'is_anonymous': question_row[q_columns.index('is_anonymous')]
+                }
+
+                questions.append(question)
+
             extra_fields = {'count': len(questions)}
             # TODO: format questions
             return build_response(httplib.OK, CODE_OK, "Successfully fetched questions",

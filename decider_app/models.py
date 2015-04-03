@@ -138,6 +138,9 @@ class Question(models.Model):
     likes = models.ManyToManyField(User, related_name="liked_questions")
     category = models.ForeignKey(Category, null=True, on_delete=models.SET_NULL)
 
+    comments_count = models.IntegerField(_(u'Количество комментов'), default=0)
+    likes_count = models.IntegerField(_(u'Количество лайков'), default=0)
+
     def __unicode__(self):
         return "Question #" + str(self.id) + " by " + self.author.email
 

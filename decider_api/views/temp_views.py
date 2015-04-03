@@ -42,13 +42,18 @@ def fill_db(request):
         user2.save()
 
     q1 = Question.objects.create(text="Question1", author=user1, category=cat1)
-    q2 = Question.objects.create(text="Question2", author=user1, category=cat2)
+    q2 = Question.objects.create(text="Question2", author=user1, category=cat2, is_anonymous=True)
     q3 = Question.objects.create(text="Question3", author=admin_user, category=cat2)
 
     q1.likes.add(user1)
     q1.likes.add(admin_user)
     q1.likes.add(user2)
+    q1.likes_count += 3
+    q1.save()
+
     q2.likes.add(admin_user)
+    q2.likes_count += 1
+    q2.save()
 
     poll1 = Poll.objects.create(question=q1)
     poll2 = Poll.objects.create(question=q2)
@@ -60,7 +65,23 @@ def fill_db(request):
     pi5 = PollItem.objects.create(poll=poll2, question=q2, text="pi5")
 
     comm1 = Comment.objects.create(question=q1, author=user1, text="hallo")
+    q1.comments_count += 1
+    q1.save()
     comm2 = Comment.objects.create(question=q1, author=admin_user, text="auf wiedersehen")
+    q1.comments_count += 1
+    q1.save()
     comm3 = Comment.objects.create(question=q3, author=admin_user, text="auf wiedersehen")
+    q3.comments_count += 1
+    q3.save()
+
+    v1 = Vote.objects.create(poll_item=pi1, poll=poll1, user=user1)
+    pi1.votes_count += 1
+    pi1.save()
+
+    v2 = Vote.objects.create(poll_item=pi3, poll=poll2, user=user2)
+    v3 = Vote.objects.create(poll_item=pi3, poll=poll2, user=admin_user)
+
+    pi3.votes_count += 2
+    pi3.save()
 
     return JsonResponse({"status": "ok"}, status=201)
