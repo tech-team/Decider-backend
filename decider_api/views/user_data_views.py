@@ -6,7 +6,7 @@ from decider_app.views.utils.response_builder import build_ok_response, build_40
 
 class UserDataEndpoint(ProtectedResourceView):
     def get(self, request, *args, **kwargs):
-        user_id = kwargs['user_id']
+        user_id = kwargs.get('user_id')
 
         try:
             user = User.objects.get(id=user_id)

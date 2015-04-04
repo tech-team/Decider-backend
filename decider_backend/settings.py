@@ -10,9 +10,12 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 from ConfigParser import NoOptionError, NoSectionError, RawConfigParser
+import logging, logging.config
 import urlparse
 from django.core.urlresolvers import reverse, reverse_lazy
 import os
+
+
 PROJECT_NAME = 'decider'
 APP_NAME = 'decider_app'
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -147,6 +150,58 @@ HOST_PORT = "8000"
 OAUTH_CLIENT_ID = get_config_opt(config, 'oauth', 'CLIENT_ID')
 OAUTH_CLIENT_SECRET = get_config_opt(config, 'oauth', 'CLIENT_SECRET')
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(message)s'
+        },
+    },
+
+    'handlers': {
+        # Include the default Django email handler for errors
+        # This is what you'd get without configuring logging at all.
+        'mail_admins': {
+            'class': 'django.utils.log.AdminEmailHandler',
+            'level': 'ERROR',
+             # But the emails are plain text by default - HTML is nicer
+            'include_html': True,
+        },
+    }
+}
+try:
+    if os.path.exists(get_config_opt(config, 'logging', 'LOG_FILE')):
+        LOGGING['handlers']['logfile'] = {
+            'class': 'logging.handlers.WatchedFileHandler',
+            'filename': get_config_opt(config, 'logging', 'LOG_FILE'),
+            'formatter': 'verbose'
+        }
+
+        LOGGING['loggers'] = {
+            # Again, default Django configuration to email unhandled exceptions
+            'django.request': {
+                'handlers': ['mail_admins'],
+                'level': 'ERROR',
+                'propagate': True,
+            },
+            # Might as well log any errors anywhere else in Django
+            'django': {
+                'handlers': ['logfile'],
+                'level': 'ERROR',
+                'propagate': False,
+            },
+            # Your own app - this assumes all your logger names start with "myapp."
+            'decider_api': {
+                'handlers': ['logfile'],
+                'level': 'WARNING',  # Or maybe INFO or DEBUG
+                'propagate': False
+            }
+        }
+except:
+    pass
+
 SOCIAL_AUTH_URL_NAMESPACE = 'api:social'
 
 SOCIAL_AUTH_USER_MODEL = 'decider_app.User'
@@ -202,3 +257,5 @@ SOCIAL_AUTH_PIPELINE = (
     # Update the user record with any changed info from the auth service.
     'social.pipeline.user.user_details'
 )
+
+

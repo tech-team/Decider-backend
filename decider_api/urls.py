@@ -1,7 +1,7 @@
 from django.conf.urls import url, patterns, include
 from decider_api.views import auth_views, temp_views
 from decider_api.views.poll_views import PollEndpoint
-from decider_api.views.question_views import QuestionsEndpoint
+from decider_api.views.question_views import QuestionsEndpoint, QuestionDetailsEndpoint
 from decider_api.views.user_data_views import UserDataEndpoint, UserEditEndpoint
 
 urlpatterns = patterns('',
@@ -15,6 +15,7 @@ urlpatterns = patterns('',
     url(r'^edit/?$', UserEditEndpoint.as_view()),
 
     url(r'^questions/?$', QuestionsEndpoint.as_view()),
+    url(r'^questions/(?P<question_id>[0-9]+)/?$', QuestionDetailsEndpoint.as_view()),
     url(r'^poll/?$', PollEndpoint.as_view()),
 
     url(r'^logout/?$', auth_views.logout_view, name="logout_view"),

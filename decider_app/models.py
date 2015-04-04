@@ -156,6 +156,7 @@ class Comment(models.Model):
 
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     question = models.ForeignKey(Question, on_delete=models.CASCADE, null=True)
+    likes_count = models.IntegerField(_(u'Количество лайков'), default=0)
     likes = models.ManyToManyField(User, related_name="liked_comments", through="CommentLike")
 
     def __unicode__(self):

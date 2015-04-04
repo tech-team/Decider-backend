@@ -8,12 +8,12 @@ def tab_switch(case):
         "my": get_my_questions
     }.get(case, None)
 
-
 QUERY = """SELECT DISTINCT d_question.id, d_question.text, d_question.creation_date,
                   d_question.category_id, d_poll.id as poll_id, d_question.author_id,
                   d_question.likes_count, d_question.comments_count, d_question.is_anonymous,
-                  d_user.first_name, d_user.last_name, d_user.middle_name,
-                  d_user.username, d_picture.url as image_url
+                  d_user.first_name as author_first_name, d_user.last_name as author_last_name,
+                  d_user.middle_name as author_middle_name, d_user.username as author_username,
+                  d_picture.url as author_image_url
            FROM d_question
               LEFT JOIN d_user ON d_question.author_id = d_user.id
               LEFT JOIN d_picture ON d_picture.id = d_user.avatar_id
@@ -22,7 +22,7 @@ QUERY = """SELECT DISTINCT d_question.id, d_question.text, d_question.creation_d
 GROUP_BY = " GROUP BY d_question.id, d_poll.id, d_user.id, d_picture.url"
 
 
-def get_questions(user_id=None, limit=None, offset=None, extras=None):
+def get_questions(limit=None, offset=None, extras=None):
     cursor = connection.cursor()
 
     query = QUERY + extras
@@ -52,3 +52,14 @@ def get_my_questions(user_id, limit=None, offset=None):
     extras = " WHERE d_question.author_id=%s" % user_id + GROUP_BY + \
              " ORDER BY d_question.creation_date DESC"
     return get_questions(limit=limit, offset=offset, extras=extras)
+
+
+def get_question(q_id):
+    extras = " WHERE d_question.id=%s" % q_id
+    cursor = connection.cursor()
+    cursor.execute(QUERY + extras)
+    question = cursor.fetchone()
+    columns = [i[0] for i in cursor.description]
+    cursor.close()
+
+    return question, columns
