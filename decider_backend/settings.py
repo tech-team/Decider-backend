@@ -10,7 +10,7 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 from ConfigParser import NoOptionError, NoSectionError, RawConfigParser
-import logging, logging.config
+import logging
 import urlparse
 from django.core.urlresolvers import reverse, reverse_lazy
 import os
@@ -172,10 +172,11 @@ LOGGING = {
     }
 }
 try:
-    if os.path.exists(get_config_opt(config, 'logging', 'LOG_FILE')):
+    LOG_FILE = get_config_opt(config, 'logging', 'LOG_FILE')
+    if os.path.exists(LOG_FILE):
         LOGGING['handlers']['logfile'] = {
             'class': 'logging.handlers.WatchedFileHandler',
-            'filename': get_config_opt(config, 'logging', 'LOG_FILE'),
+            'filename': LOG_FILE,
             'formatter': 'verbose'
         }
 

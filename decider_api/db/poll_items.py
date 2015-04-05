@@ -1,10 +1,9 @@
 from django.db import connection
 
-QUERY = """ SELECT DISTINCT d_poll_item.id, d_poll_item.question_id, d_poll_item.text,
+QUERY = """ SELECT d_poll_item.id, d_poll_item.question_id, d_poll_item.text,
                    d_picture.url as image_url, d_poll_item.votes_count
             FROM d_poll_item
               LEFT JOIN d_picture ON d_poll_item.picture_id = d_picture.id
-              LEFT JOIN d_vote ON d_poll_item.id = d_vote.poll_item_id
             WHERE d_poll_item.poll_id in (%s)"""
 
 

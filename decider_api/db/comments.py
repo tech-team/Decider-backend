@@ -1,6 +1,6 @@
 from django.db import connection
 
-QUERY = """ SELECT DISTINCT d_comment.id, d_comment.text, d_comment.creation_date, d_comment.likes_count,
+QUERY = """ SELECT d_comment.id, d_comment.text, d_comment.creation_date, d_comment.likes_count,
                 author_user.first_name as author_first_name, author_user.last_name as author_last_name,
                 author_user.middle_name as author_middle_name, author_user.username as author_username,
                 author_picture.url as author_image_url, author_user.id as author_id

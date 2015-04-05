@@ -8,7 +8,7 @@ def tab_switch(case):
         "my": get_my_questions
     }.get(case, None)
 
-QUERY = """SELECT DISTINCT d_question.id, d_question.text, d_question.creation_date,
+QUERY = """SELECT d_question.id, d_question.text, d_question.creation_date,
                   d_question.category_id, d_poll.id as poll_id, d_question.author_id,
                   d_question.likes_count, d_question.comments_count, d_question.is_anonymous,
                   d_user.first_name as author_first_name, d_user.last_name as author_last_name,

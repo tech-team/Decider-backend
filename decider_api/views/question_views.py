@@ -1,11 +1,11 @@
 import httplib
 import json
-import logging
 from django.db import transaction
 from oauth2_provider.views import ProtectedResourceView
 from decider_api.db.comments import get_comments
 from decider_api.db.poll_items import get_poll_items
 from decider_api.db.questions import tab_switch, get_question
+from decider_api.log_manager import logger
 from decider_api.utils.endpoint_decorators import require_post_data, require_get_params
 from decider_app.models import Question, Category, User, Poll, PollItem, Picture
 from decider_app.views.utils.response_builder import build_response, build_error_response
@@ -26,7 +26,7 @@ class QuestionsEndpoint(ProtectedResourceView):
                     if tab_func is None:
                         return build_error_response(httplib.NOT_FOUND, CODE_UNKNOWN_TAB, "Tab is unknown")
                 except TypeError:
-                    logging.warning("Wrong tab format")
+                    logger.warning("Wrong tab format")
                     return build_error_response(httplib.NOT_FOUND, CODE_UNKNOWN_TAB, "Tab is unknown")
             else:
                 tab_func = tab_switch('new')
@@ -99,7 +99,7 @@ class QuestionsEndpoint(ProtectedResourceView):
                                   questions, extra_fields)
 
         except Exception as e:
-            logging.exception(e)
+            logger.exception(e)
             return build_error_response(httplib.BAD_REQUEST, CODE_INVALID_DATA, "Failed to list questions")
 
     @transaction.atomic
@@ -136,7 +136,7 @@ class QuestionsEndpoint(ProtectedResourceView):
                 except Picture.DoesNotExist:
                     picture = None
                 except Exception as e:
-                    logging.exception(e)
+                    logger.exception(e)
                     picture = None
 
                 if not text:
@@ -175,14 +175,13 @@ class QuestionsEndpoint(ProtectedResourceView):
 
             return build_response(httplib.CREATED, CODE_CREATED, "Question added", data)
         except Exception as e:
-            logging.exception(e)
+            logger.exception(e)
             return build_error_response(httplib.BAD_REQUEST, CODE_INVALID_DATA, "Failed to create question")
 
 
 class QuestionDetailsEndpoint(ProtectedResourceView):
     def get(self, request, *args, **kwargs):
         try:
-            raise Exception("see?")
 
             try:
                 q_id = int(kwargs.get("question_id"))
@@ -255,6 +254,6 @@ class QuestionDetailsEndpoint(ProtectedResourceView):
             return build_response(httplib.OK, CODE_OK, "Successfully fetched question", data=question)
 
         except Exception as e:
-            logging.exception(e)
+            logger.exception(e)
             return build_error_response(httplib.BAD_REQUEST, CODE_INVALID_DATA,
                                         "Failed to get question details")

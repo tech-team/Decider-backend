@@ -1,8 +1,8 @@
 import httplib
 import json
-import logging
-from django.db import transaction, IntegrityError
+from django.db import transaction
 from oauth2_provider.views import ProtectedResourceView
+from decider_api.log_manager import logger
 from decider_api.utils.endpoint_decorators import require_post_data
 from decider_app.models import Vote, Poll, PollItem
 from decider_app.views.utils.response_builder import build_error_response, build_response
@@ -29,7 +29,7 @@ class PollEndpoint(ProtectedResourceView):
                 return build_error_response(httplib.NOT_FOUND, CODE_UNKNOWN_POLL,
                                             "Poll with specified id was not found")
             except PollItem.DoesNotExist:
-                logging.warning("Poll item " + str(pi_id) + " did not match poll " + str(p_id))
+                logger.warning("Poll item " + str(pi_id) + " did not match poll " + str(p_id))
                 return build_error_response(httplib.NOT_FOUND, CODE_UNKNOWN_POLL_ITEM,
                                             "Poll item with specified id was not found")
 
@@ -42,5 +42,5 @@ class PollEndpoint(ProtectedResourceView):
 
             return build_response(httplib.CREATED, CODE_CREATED, "Success", extra_fields=extra_fields)
         except Exception as e:
-            logging.exception(e)
+            logger.exception(e)
             return build_error_response(httplib.BAD_REQUEST, CODE_INVALID_DATA, "Failed to vote")
