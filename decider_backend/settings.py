@@ -143,9 +143,9 @@ CORS_ORIGIN_ALLOW_ALL = True if DEBUG else False
 
 LOGIN_URL = "/login/"
 
-HOST_SCHEMA = "http"
-HOST_ADDRESS = "0.0.0.0"
-HOST_PORT = "8000"
+HOST_SCHEMA = get_config_opt(config, 'host', 'HOST_SCHEMA', 'http')
+HOST_ADDRESS = get_config_opt(config, 'host', 'HOST_ADDRESS', '0.0.0.0')
+HOST_PORT = get_config_opt(config, 'host', 'HOST_PORT', '31700')
 
 OAUTH_CLIENT_ID = get_config_opt(config, 'oauth', 'CLIENT_ID')
 OAUTH_CLIENT_SECRET = get_config_opt(config, 'oauth', 'CLIENT_SECRET')
