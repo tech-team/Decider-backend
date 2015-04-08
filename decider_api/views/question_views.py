@@ -18,6 +18,7 @@ class QuestionsEndpoint(ProtectedResourceView):
             tab = request.GET.get('tab')
             limit = request.GET.get('limit')
             offset = request.GET.get('offset')
+            categories = request.GET.getlist('categories[]')
 
             errors = []
             if tab:
@@ -30,6 +31,13 @@ class QuestionsEndpoint(ProtectedResourceView):
                     return build_error_response(httplib.NOT_FOUND, CODE_UNKNOWN_TAB, "Tab is unknown")
             else:
                 tab_func = tab_switch('new')
+
+            if categories:
+                try:
+                    for i in range(len(categories)):
+                        categories[i] = int(categories[i])
+                except (TypeError, ValueError):
+                    errors.append('categories')
 
             if limit:
                 try:
@@ -48,7 +56,8 @@ class QuestionsEndpoint(ProtectedResourceView):
 
             question_list, q_columns = tab_func(user_id=request.resource_owner.id,
                                                 limit=limit,
-                                                offset=offset)
+                                                offset=offset,
+                                                categories=categories)
             questions = []
             polls = []
             for question_row in question_list:
