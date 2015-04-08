@@ -43,7 +43,6 @@ def get_questions(*args, **kwargs):
     if kwargs.get('offset') is not None:
         query += " OFFSET %s " % kwargs.get('offset')
 
-    print(query)
     cursor.execute(query)
     questions = cursor.fetchall()
     columns = [i[0] for i in cursor.description]

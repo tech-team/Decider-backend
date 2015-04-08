@@ -17,6 +17,9 @@ def truncate_all():
 def fill_db(request):
     truncate_all()
 
+    """ COUNTRIES """
+    country1 = Country.objects.create(name="Russland")
+
     """ USERS """
     try:
         admin_user = User.objects.get(email="admin@admin.com")
@@ -34,9 +37,6 @@ def fill_db(request):
         user2 = User.objects.create(username="aaa", email="aaa@aaa.aaa", country=country1)
         user2.set_password("aaa")
         user2.save()
-
-    """ COUNTRIES """
-    country1 = Country.objects.create(name="Russland")
 
     """ PICTURES """
     picture1 = Picture.objects.create(url="see.com")

@@ -201,8 +201,6 @@ class QuestionDetailsEndpoint(ProtectedResourceView):
                                             "Some fields are invalid", ["question_id"])
 
             question_row, q_columns = get_question(q_id)
-            print(q_columns)
-            print(question_row)
             if question_row is None:
                 return build_error_response(httplib.NOT_FOUND, CODE_UNKNOWN_QUESTION,
                                             "Question with specified id was not found")
