@@ -17,8 +17,9 @@ QUERY = """SELECT d_question.id, d_question.text, d_question.creation_date,
            FROM d_question
               LEFT JOIN d_user ON d_question.author_id = d_user.id
               LEFT JOIN d_picture ON d_picture.id = d_user.avatar_id
-              LEFT JOIN d_poll ON d_question.id = d_poll.question_id
-           WHERE 1=1 """
+              LEFT JOIN d_poll ON d_question.id = d_poll.question_id"""
+
+WHERE = " WHERE 1=1"
 
 GROUP_BY = " GROUP BY d_question.id, d_poll.id, d_user.id, d_picture.url"
 
@@ -26,7 +27,7 @@ GROUP_BY = " GROUP BY d_question.id, d_poll.id, d_user.id, d_picture.url"
 def get_questions(*args, **kwargs):
     cursor = connection.cursor()
 
-    query = QUERY
+    query = QUERY + WHERE
     if kwargs.get('categories'):
         category_ids = (', '.join([str(x) for x in kwargs.get('categories')]))
         query += ' AND d_question.category_id IN (%s)' % category_ids
