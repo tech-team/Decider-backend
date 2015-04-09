@@ -1,4 +1,4 @@
-
+# coding=utf-8
 from django.db import transaction
 from django.http import JsonResponse
 from decider_app.models import *
@@ -10,6 +10,7 @@ def truncate_all():
     CommentLike.objects.all().delete()
     Country.objects.all().delete()
     Category.objects.all().delete()
+    Locale.objects.all().delete()
     Picture.objects.all().delete()
 
 
@@ -28,23 +29,39 @@ def fill_db(request):
     try:
         user1 = User.objects.get(email="snake@snake.snake")
     except User.DoesNotExist:
-        user1 = User.objects.create(username="snake", email="snake@snake.snake", country=country1)
+        user1 = User.objects.create(uid=get_random_uid(), username="snake", email="snake@snake.snake", country=country1)
         user1.set_password("snake")
         user1.save()
     try:
         user2 = User.objects.get(email="aaa@aaa.aaa")
     except User.DoesNotExist:
-        user2 = User.objects.create(username="aaa", email="aaa@aaa.aaa", country=country1)
+        user2 = User.objects.create(uid=get_random_uid(), username="aaa", email="aaa@aaa.aaa", country=country1)
         user2.set_password("aaa")
         user2.save()
 
     """ PICTURES """
-    picture1 = Picture.objects.create(url="see.com")
-    picture2 = Picture.objects.create(url="sieben.com")
+    picture1 = Picture.objects.create(uid=get_random_uid(), url="see.com")
+    picture2 = Picture.objects.create(uid=get_random_uid(), url="sieben.com")
+
+    """ LOCALES """
+    loc1 = Locale.objects.create(name="en_US")
+    loc2 = Locale.objects.create(name="ru_RU")
 
     """ CATEGORIES """
-    cat1 = Category.objects.create(name="clothes")
-    cat2 = Category.objects.create(name="furniture")
+    cat1 = Category.objects.create()
+    cat2 = Category.objects.create()
+    cat3 = Category.objects.create()
+    cat4 = Category.objects.create()
+
+    """ LOCALE CATEGORIES """
+    lc1 = LocaleCategory.objects.create(locale=loc1, category=cat1, name="Furniture")
+    lc2 = LocaleCategory.objects.create(locale=loc2, category=cat1, name=u"Мебель")
+    lc3 = LocaleCategory.objects.create(locale=loc1, category=cat2, name="Clothes")
+    lc4 = LocaleCategory.objects.create(locale=loc2, category=cat2, name=u"Одежда")
+    lc5 = LocaleCategory.objects.create(locale=loc1, category=cat3, name="Life")
+    lc6 = LocaleCategory.objects.create(locale=loc2, category=cat3, name=u"Жиза")
+    lc7 = LocaleCategory.objects.create(locale=loc1, category=cat4, name="Music")
+    lc8 = LocaleCategory.objects.create(locale=loc2, category=cat4, name=u"Музыка")
 
     """ QUESTIONS """
     q1 = Question.objects.create(text="Question1", author=user1, category=cat1)

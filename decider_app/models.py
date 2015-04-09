@@ -20,6 +20,7 @@ class MyUserManager(BaseUserManager):
         now = timezone.now()
         email = self.normalize_email(email)
         user = self.model(username=username, email=email,
+                          uid=get_random_uid(),
                           is_staff=is_staff, is_active=True,
                           is_superuser=is_superuser, last_login=now,
                           date_joined=now, **extra_fields)
@@ -56,7 +57,7 @@ class Picture(models.Model):
         ordering = ('date_uploaded', )
         db_table = "d_picture"
 
-    uid = models.CharField(max_length=32, default=get_random_uid, verbose_name=u'Уникальный идентификатор')
+    uid = models.CharField(max_length=100, unique=True, verbose_name=u'Уникальный идентификатор')
     url = models.CharField(max_length=255, verbose_name=u'Адрес картинки')
     date_uploaded = models.DateTimeField(default=timezone.now, verbose_name=u'Дата загрузки')
 
@@ -65,8 +66,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = MyUserManager()
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
+    USERNAME_FIELD = 'uid'
 
     class Meta:
         verbose_name = _(u'Пользователь')
@@ -74,7 +74,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         ordering = ('-date_joined', )
         db_table = "d_user"
 
-    email = models.EmailField(_('email address'), max_length=100, blank=False, unique=True)
+    email = models.EmailField(_('email address'), max_length=100, default=True, null=True, unique=True)
+    uid = models.CharField(_('unique id for user'), max_length=50, unique=True)
 
     username = models.CharField(_('username'), max_length=50, blank=True, default='')
     first_name = models.CharField(_('first name'), max_length=50, blank=True, default='')
@@ -116,8 +117,6 @@ class Category(models.Model):
         verbose_name_plural = _(u'Категории')
         db_table = "d_category"
 
-    name = models.CharField(_(u'Название'), max_length=50)
-
     def __unicode__(self):
         return self.name
 
@@ -142,7 +141,7 @@ class Question(models.Model):
     likes_count = models.IntegerField(_(u'Количество лайков'), default=0)
 
     def __unicode__(self):
-        return "Question #" + str(self.id) + " by " + self.author.email
+        return "Question #" + str(self.id) + " by " + self.author.uid
 
 
 class Comment(models.Model):
@@ -160,7 +159,7 @@ class Comment(models.Model):
     likes = models.ManyToManyField(User, related_name="liked_comments", through="CommentLike")
 
     def __unicode__(self):
-        return "Comment #" + str(self.id) + " by " + self.author.email
+        return "Comment #" + str(self.id) + " by " + self.author.uid
 
 
 class CommentLike(models.Model):
@@ -175,7 +174,7 @@ class CommentLike(models.Model):
 
     def __unicode__(self):
         return "Like for comment #" + str(self.comment.id) + \
-               ", question #" + str(self.question.id) + " by " + self.user.email
+               ", question #" + str(self.question.id) + " by " + self.user.uid
 
 
 class Poll(models.Model):
@@ -220,4 +219,32 @@ class Vote(models.Model):
 
     def __unicode__(self):
         return "Vote for poll item #" + str(self.poll_item.id) + \
-               " for poll #" + str(self.poll.id) + " by user " + str(self.user.email)
+               " for poll #" + str(self.poll.id) + " by user " + str(self.user.uid)
+
+
+class Locale(models.Model):
+    class Meta:
+        verbose_name = _(u'Локаль')
+        verbose_name_plural = _(u'Локали')
+        ordering = ('name', )
+        db_table = "d_locale"
+
+    name = models.CharField(max_length=10, verbose_name=u'Название')
+    categories = models.ManyToManyField(Category, related_name="locales", through="LocaleCategory")
+
+    def __unicode__(self):
+        return self.name
+
+
+class LocaleCategory(models.Model):
+    class Meta:
+        verbose_name = _(u'Локаль категории')
+        verbose_name_plural = _(u'Локали категорий')
+        db_table = "d_locale_category"
+
+    locale = models.ForeignKey(Locale, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100, verbose_name=u'Название')
+
+    def __unicode__(self):
+        return "Locale " + self.locale.name + " for category " + str(self.category.id)

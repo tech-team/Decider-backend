@@ -91,6 +91,7 @@ class QuestionsEndpoint(ProtectedResourceView):
                     'comments_count': question_row[q_columns.index('comments_count')],
                     'author': {
                         'id': question_row[q_columns.index('author_id')],
+                        'uid': question_row[q_columns.index('author_uid')],
                         'username': question_row[q_columns.index('author_username')],
                         'first_name': question_row[q_columns.index('author_first_name')],
                         'last_name': question_row[q_columns.index('author_last_name')],
@@ -162,6 +163,7 @@ class QuestionsEndpoint(ProtectedResourceView):
 
             author = {
                 "id": request.resource_owner.id,
+                'uid': request.resource_owner.uid,
                 "username": request.resource_owner.username,
                 "last_name": request.resource_owner.last_name,
                 "first_name": request.resource_owner.first_name,
@@ -212,6 +214,7 @@ class QuestionDetailsEndpoint(ProtectedResourceView):
                 'category_id': question_row[q_columns.index('category_id')],
                 'author': {
                     'id': question_row[q_columns.index('author_id')],
+                    'uid': question_row[q_columns.index('author_uid')],
                     'username': question_row[q_columns.index('author_username')],
                     'first_name': question_row[q_columns.index('author_first_name')],
                     'last_name': question_row[q_columns.index('author_last_name')],
@@ -247,6 +250,7 @@ class QuestionDetailsEndpoint(ProtectedResourceView):
                         'likes_count': comment_row[c_columns.index('likes_count')],
                         'author': {
                             'id': comment_row[c_columns.index('author_id')],
+                            'uid': comment_row[c_columns.index('author_uid')],
                             'username': comment_row[c_columns.index('author_username')],
                             'first_name': comment_row[c_columns.index('author_first_name')],
                             'last_name': comment_row[c_columns.index('author_last_name')],

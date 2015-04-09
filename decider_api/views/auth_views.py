@@ -17,9 +17,9 @@ from decider_app.views.utils.response_codes import CODE_OK, CODE_INVALID_LOGIN, 
     CODE_INSUFFICIENT_LOGIN, CODE_EMAIL_TAKEN, CODE_CREATED, CODE_REGISTRATION_FAILED
 
 
-def get_token_data(email, password):
+def get_token_data(uid, password):
     try:
-        post_data = urllib.urlencode(build_token_request_data(email, password))
+        post_data = urllib.urlencode(build_token_request_data(uid, password))
         token_response = urllib2.urlopen(urllib2.Request(get_token_url(), data=post_data))
         token_data = json.loads(token_response.read())
         if not token_data:

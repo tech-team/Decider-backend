@@ -13,7 +13,7 @@ QUERY = """SELECT d_question.id, d_question.text, d_question.creation_date,
                   d_question.likes_count, d_question.comments_count, d_question.is_anonymous,
                   d_user.first_name as author_first_name, d_user.last_name as author_last_name,
                   d_user.middle_name as author_middle_name, d_user.username as author_username,
-                  d_picture.url as author_image_url
+                  d_user.uid as author_uid, d_picture.url as author_image_url
            FROM d_question
               LEFT JOIN d_user ON d_question.author_id = d_user.id
               LEFT JOIN d_picture ON d_picture.id = d_user.avatar_id
