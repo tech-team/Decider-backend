@@ -1,5 +1,6 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
+from decider_backend.settings import DEBUG, MEDIA_ROOT
 
 urlpatterns = patterns('',
     # Examples:
@@ -11,3 +12,11 @@ urlpatterns = patterns('',
     url(r'^api/v1/', include('decider_api.urls', namespace="api")),
     url(r'^api/v1/o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
 )
+
+
+if DEBUG:
+    urlpatterns += patterns('',
+        url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {
+            'document_root': MEDIA_ROOT,
+        }),
+    )

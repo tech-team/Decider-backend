@@ -4,17 +4,17 @@ import urllib
 import urllib2
 from django.contrib.auth import authenticate, logout
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.shortcuts import redirect
 from django.views.decorators.http import require_http_methods
 
 import json
-import requests
 from decider_app.models import User, SocialSite
 from decider_app.views.utils.auth_helper import build_token_request_data, get_token_url
 from decider_app.views.utils.response_builder import build_response, build_error_response
 from decider_api.log_manager import logger
 from decider_app.views.utils.response_codes import CODE_OK, CODE_INVALID_CREDENTIALS, CODE_LOGIN_FAILED, \
-    CODE_INSUFFICIENT_CREDENTIALS, CODE_EMAIL_TAKEN, CODE_CREATED, CODE_REGISTRATION_FAILED, CODE_UNKNOWN_SOCIAL
+    CODE_INSUFFICIENT_CREDENTIALS, CODE_UNKNOWN_SOCIAL
 
 
 def get_token_data(email, password):
@@ -34,6 +34,7 @@ def get_token_data(email, password):
     except Exception as e:
         logger.exception(e)
         return False
+
 
 @require_http_methods(['POST'])
 def login(request):
@@ -71,6 +72,7 @@ def login(request):
         return build_error_response(httplib.BAD_REQUEST, CODE_INSUFFICIENT_CREDENTIALS, 'Some fields are not filled')
 
 
+@transaction.atomic
 @require_http_methods(['POST'])
 def registration(request):
     email = request.POST.get('email')

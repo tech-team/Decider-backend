@@ -45,7 +45,7 @@ config.read(os.path.join("conf", PROJECT_NAME + ".conf"))
 SECRET_KEY = get_config_opt(config, 'django', 'SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = get_config_opt(config, 'common', 'DEBUG', True)
 
 TEMPLATE_DEBUG = True
 
@@ -134,6 +134,8 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
+
+MEDIA_ROOT = get_config_opt(config, 'common', 'MEDIA_ROOT', os.path.join(APP_DIR, 'media'))
 
 STATIC_URL = os.path.join(APP_DIR, '/static/')
 
@@ -261,4 +263,4 @@ SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.user.user_details'
 )
 
-
+IMAGE_SIZE = (250, 250)

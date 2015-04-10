@@ -67,6 +67,9 @@ fi
 sudo apt-get update
 sudo apt-get -y upgrade
 
+# Needed for Pillow
+sudo apt-get -y install "libjpeg-dev"
+
 sudo apt-get -y install "postgresql-$PG_VERSION" \
                         "postgresql-contrib-$PG_VERSION" \
                          pgadmin3 \
