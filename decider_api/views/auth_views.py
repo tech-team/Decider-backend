@@ -39,14 +39,16 @@ def get_token_data(email, password):
 def login(request):
     email = request.POST.get('email')
 
-    social_name = str(request.POST.get('social_name'))
-    social_id = str(request.POST.get('social_id'))
+    social_name = request.POST.get('social_name')
+    social_id = request.POST.get('social_id')
 
     password = request.POST.get('password')
     if password and (email or social_name and social_id):
         if email:
             user = authenticate(email=email, password=password)
         else:
+            social_name = str(social_name)
+            social_id = str(social_id)
             try:
                 social_site = SocialSite.objects.get(name=social_name)
             except SocialSite.DoesNotExist:
