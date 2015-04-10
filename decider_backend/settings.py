@@ -115,8 +115,9 @@ AUTH_USER_MODEL = 'decider_app.User'
 # https://docs.djangoproject.com/en/1.7/topics/i18n/
 
 AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
+    # 'django.contrib.auth.backends.ModelBackend',
     'decider_app.backends.EmailAuthBackend',
+    'decider_app.backends.SocialAuthBackend',
     'social.backends.vk.VKOAuth2'
 )
 

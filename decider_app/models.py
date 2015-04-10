@@ -37,6 +37,19 @@ class MyUserManager(BaseUserManager):
                                  True, True, **extra_fields)
 
 
+class SocialSite(models.Model):
+    class Meta:
+        verbose_name = _(u'Социальный сайт')
+        verbose_name_plural = _(u'Социальные сайты')
+        ordering = ('name', )
+        db_table = "d_social_site"
+
+    name = models.CharField(max_length=20, verbose_name=u'Название')
+
+    def __unicode__(self):
+        return self.name
+
+
 class Country(models.Model):
     class Meta:
         verbose_name = _(u'Страна')
@@ -73,9 +86,12 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name_plural = _(u'Пользователи')
         ordering = ('-date_joined', )
         db_table = "d_user"
+        unique_together = ('social_site', 'social_id',)
 
     email = models.EmailField(_('email address'), max_length=100, default=True, null=True, unique=True)
     uid = models.CharField(_('unique id for user'), max_length=50, unique=True)
+    social_site = models.ForeignKey(SocialSite, blank=True, null=True)
+    social_id = models.CharField(_('social site id'), max_length=100, blank=True, null=True)
 
     username = models.CharField(_('username'), max_length=50, blank=True, default='')
     first_name = models.CharField(_('first name'), max_length=50, blank=True, default='')

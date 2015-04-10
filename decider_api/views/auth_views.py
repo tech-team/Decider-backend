@@ -9,17 +9,17 @@ from django.views.decorators.http import require_http_methods
 
 import json
 import requests
-from decider_app.models import User
+from decider_app.models import User, SocialSite
 from decider_app.views.utils.auth_helper import build_token_request_data, get_token_url
 from decider_app.views.utils.response_builder import build_response, build_error_response
 from decider_api.log_manager import logger
-from decider_app.views.utils.response_codes import CODE_OK, CODE_INVALID_LOGIN, CODE_LOGIN_FAILED, \
-    CODE_INSUFFICIENT_LOGIN, CODE_EMAIL_TAKEN, CODE_CREATED, CODE_REGISTRATION_FAILED
+from decider_app.views.utils.response_codes import CODE_OK, CODE_INVALID_CREDENTIALS, CODE_LOGIN_FAILED, \
+    CODE_INSUFFICIENT_CREDENTIALS, CODE_EMAIL_TAKEN, CODE_CREATED, CODE_REGISTRATION_FAILED, CODE_UNKNOWN_SOCIAL
 
 
-def get_token_data(uid, password):
+def get_token_data(email, password):
     try:
-        post_data = urllib.urlencode(build_token_request_data(uid, password))
+        post_data = urllib.urlencode(build_token_request_data(email, password))
         token_response = urllib2.urlopen(urllib2.Request(get_token_url(), data=post_data))
         token_data = json.loads(token_response.read())
         if not token_data:
@@ -38,42 +38,90 @@ def get_token_data(uid, password):
 @require_http_methods(['POST'])
 def login(request):
     email = request.POST.get('email')
+
+    social_name = str(request.POST.get('social_name'))
+    social_id = str(request.POST.get('social_id'))
+
     password = request.POST.get('password')
-    if email and password:
-        user = authenticate(email=email, password=password)
-        if not user:
-            return build_error_response(httplib.FORBIDDEN, CODE_INVALID_LOGIN, 'Invalid email/password')
+    if password and (email or social_name and social_id):
+        if email:
+            user = authenticate(email=email, password=password)
         else:
-            data = get_token_data(email, password)
+            try:
+                social_site = SocialSite.objects.get(name=social_name)
+            except SocialSite.DoesNotExist:
+                return build_error_response(httplib.NOT_FOUND, CODE_UNKNOWN_SOCIAL,
+                                            'Unknown social site')
+
+            user = authenticate(social_id=social_id, social_site=social_site,
+                                password=password)
+
+        if not user:
+            return build_error_response(httplib.FORBIDDEN, CODE_INVALID_CREDENTIALS, 'Invalid credentials')
+        else:
+            data = get_token_data(user.email, password)
             if not data:
                 return build_error_response(httplib.INTERNAL_SERVER_ERROR, CODE_LOGIN_FAILED, "Login failed")
             else:
+                data.update({'uid': user.uid})
                 return build_response(httplib.OK, CODE_OK, "Login successful", data)
     else:
-        return build_error_response(httplib.BAD_REQUEST, CODE_INSUFFICIENT_LOGIN, 'Some fields are not filled')
+        return build_error_response(httplib.BAD_REQUEST, CODE_INSUFFICIENT_CREDENTIALS, 'Some fields are not filled')
 
 
 @require_http_methods(['POST'])
 def registration(request):
     email = request.POST.get('email')
-    password = request.POST.get('password')
-    if email and password:
-        try:
-            user = User.objects.get(email=email)
-            if user:
-                return build_error_response(httplib.FORBIDDEN, CODE_EMAIL_TAKEN, "Email is taken")
-        except User.DoesNotExist:
-            user = User.objects.create(email=email)
-            user.set_password(request.POST.get("password"))
-            user.save()
 
-            data = get_token_data(email, password)
-            if not data:
-                return build_error_response(httplib.INTERNAL_SERVER_ERROR, CODE_REGISTRATION_FAILED, "Registration failed")
-            else:
-                return build_response(httplib.CREATED, CODE_CREATED, "Registration successful", data)
+    social_name = request.POST.get('social_name')
+    social_id = request.POST.get('social_id')
+
+    password = request.POST.get('password')
+    if password and (email or social_name and social_id):
+        if email:
+            try:
+                User.objects.get(email=email)
+                user = authenticate(email=email, password=password)
+                if not user:
+                    return build_error_response(httplib.FORBIDDEN, CODE_INVALID_CREDENTIALS,
+                                                "Invalid credentials")
+            except User.DoesNotExist:
+                user = User.objects.create(email=email)
+                user.set_password(request.POST.get("password"))
+                user.save()
+
+        else:
+            social_name = str(social_name)
+            social_id = str(social_id)
+            try:
+                social_site = SocialSite.objects.get(name=social_name)
+            except SocialSite.DoesNotExist:
+                return build_error_response(httplib.NOT_FOUND, CODE_UNKNOWN_SOCIAL,
+                                            'Unknown social site')
+
+            try:
+                User.objects.get(social_id=social_id, social_site=social_site)
+                user = authenticate(social_id=social_id, social_site=social_site,
+                                    password=password)
+                if not user:
+                    return build_error_response(httplib.FORBIDDEN, CODE_INVALID_CREDENTIALS,
+                                                "Invalid credentials")
+            except User.DoesNotExist:
+                user = User.objects.create(social_id=social_id, social_site=social_site)
+                user.email = user.uid
+                user.set_password(request.POST.get("password"))
+                user.save()
+
+        data = get_token_data(user.email, password)
+        if not data:
+            return build_error_response(httplib.INTERNAL_SERVER_ERROR, CODE_LOGIN_FAILED, "Registration failed")
+        else:
+            data.update({'uid': user.uid})
+            return build_response(httplib.OK, CODE_OK, "Registration successful", data)
+
     else:
-        return build_error_response(httplib.BAD_REQUEST, CODE_INSUFFICIENT_LOGIN, 'Some fields are not filled')
+        return build_error_response(httplib.BAD_REQUEST, CODE_INSUFFICIENT_CREDENTIALS,
+                                    'Some fields are not filled')
 
 
 @login_required(login_url='/login/')
