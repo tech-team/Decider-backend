@@ -7,6 +7,7 @@ from decider_api.db.poll_items import get_poll_items
 from decider_api.db.questions import tab_switch, get_question
 from decider_api.log_manager import logger
 from decider_api.utils.endpoint_decorators import require_post_data, require_get_params
+from decider_api.utils.helper import get_short_user_data, get_short_user_row_data
 from decider_app.models import Question, Category, User, Poll, PollItem, Picture
 from decider_app.views.utils.response_builder import build_response, build_error_response
 from decider_app.views.utils.response_codes import *
@@ -89,15 +90,7 @@ class QuestionsEndpoint(ProtectedResourceView):
                     'category_id': question_row[q_columns.index('category_id')],
                     'likes_count': question_row[q_columns.index('likes_count')],
                     'comments_count': question_row[q_columns.index('comments_count')],
-                    'author': {
-                        'id': question_row[q_columns.index('author_id')],
-                        'uid': question_row[q_columns.index('author_uid')],
-                        'username': question_row[q_columns.index('author_username')],
-                        'first_name': question_row[q_columns.index('author_first_name')],
-                        'last_name': question_row[q_columns.index('author_last_name')],
-                        'middle_name': question_row[q_columns.index('author_middle_name')],
-                        'avatar': question_row[q_columns.index('author_image_url')]
-                    },
+                    'author': get_short_user_row_data(question_row, q_columns, 'author'),
                     'poll': poll_items.get(question_row[q_columns.index('id')]),
                     'is_anonymous': question_row[q_columns.index('is_anonymous')]
                 }
@@ -119,7 +112,7 @@ class QuestionsEndpoint(ProtectedResourceView):
             data = json.loads(request.POST.get("data"))
             text = data.get("text")
             poll = data.get("poll")
-            is_anonymous = data.get("is_anonymous") if data.get("is_anonymous") else False
+            is_anonymous = True if data.get("is_anonymous") is True else False
 
             try:
                 category_id = int(data.get("category_id"))
@@ -161,25 +154,12 @@ class QuestionsEndpoint(ProtectedResourceView):
                     'image_url': pi.picture.url if pi.picture else None
                 })
 
-            author = {
-                "id": request.resource_owner.id,
-                'uid': request.resource_owner.uid,
-                "username": request.resource_owner.username,
-                "last_name": request.resource_owner.last_name,
-                "first_name": request.resource_owner.first_name,
-                "middle_name": request.resource_owner.middle_name
-            }
-            if request.resource_owner.avatar:
-                author['avatar'] = request.resource_owner.avatar.url
-            else:
-                author['avatar'] = None
-
             data = {
                 "id": question.id,
                 "text": question.text,
                 "creation_date": question.creation_date,
                 "category_id": category.id,
-                "author": author,
+                "author": get_short_user_data(request.resource_owner),
                 "poll": data_poll,
                 "is_anonymous": question.is_anonymous
             }
@@ -212,15 +192,7 @@ class QuestionDetailsEndpoint(ProtectedResourceView):
                 'text': question_row[q_columns.index('text')],
                 'creation_date': question_row[q_columns.index('creation_date')],
                 'category_id': question_row[q_columns.index('category_id')],
-                'author': {
-                    'id': question_row[q_columns.index('author_id')],
-                    'uid': question_row[q_columns.index('author_uid')],
-                    'username': question_row[q_columns.index('author_username')],
-                    'first_name': question_row[q_columns.index('author_first_name')],
-                    'last_name': question_row[q_columns.index('author_last_name')],
-                    'middle_name': question_row[q_columns.index('author_middle_name')],
-                    'avatar': question_row[q_columns.index('author_image_url')]
-                },
+                'author': get_short_user_row_data(question_row, q_columns, 'author'),
                 'likes_count': question_row[q_columns.index('likes_count')],
                 'is_anonymous': question_row[q_columns.index('is_anonymous')]
             }
@@ -248,15 +220,7 @@ class QuestionDetailsEndpoint(ProtectedResourceView):
                         'text': comment_row[c_columns.index('text')],
                         'creation_date': comment_row[c_columns.index('creation_date')],
                         'likes_count': comment_row[c_columns.index('likes_count')],
-                        'author': {
-                            'id': comment_row[c_columns.index('author_id')],
-                            'uid': comment_row[c_columns.index('author_uid')],
-                            'username': comment_row[c_columns.index('author_username')],
-                            'first_name': comment_row[c_columns.index('author_first_name')],
-                            'last_name': comment_row[c_columns.index('author_last_name')],
-                            'middle_name': comment_row[c_columns.index('author_middle_name')],
-                            'avatar': comment_row[c_columns.index('author_image_url')]
-                        },
+                        'author': get_short_user_row_data(question_row, q_columns, 'author'),
                     })
                 question['comments'] = comments
             else:

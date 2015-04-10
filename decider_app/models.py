@@ -104,6 +104,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(_('active'), default=True,
                                     help_text=_('Designates whether this user should be treated as '
                                                 'active. Unselect this instead of deleting accounts.'))
+    is_anonymous = models.BooleanField(default=False)
 
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
 
@@ -168,6 +169,7 @@ class Comment(models.Model):
 
     text = models.TextField(_(u'Текст комментария'), max_length=1000, blank=True, default='')
     creation_date = models.DateTimeField(_(u'Дата создания'), default=timezone.now)
+    is_anonymous = models.BooleanField(default=False)
 
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     question = models.ForeignKey(Question, on_delete=models.CASCADE, null=True)
