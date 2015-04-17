@@ -6,6 +6,7 @@ from decider_api.views.image_views import ImagesEndpoint
 from decider_api.views.poll_views import PollEndpoint
 from decider_api.views.question_views import QuestionsEndpoint, QuestionDetailsEndpoint
 from decider_api.views.user_data_views import UserDataEndpoint, UserEditEndpoint
+from decider_api.views.vote_views import VoteEndpoint
 
 urlpatterns = patterns('',
     url(r'^social/', include('social.apps.django_app.urls', namespace='social')),
@@ -23,6 +24,7 @@ urlpatterns = patterns('',
     url(r'^images/?$', ImagesEndpoint.as_view()),
     url(r'^categories/?$', CategoriesEndpoint.as_view()),
     url(r'^comment/?$', CommentEndpoint.as_view()),
+    url(r'^vote/?$', VoteEndpoint.as_view()),
 
     url(r'^logout/?$', auth_views.logout_view, name="logout_view"),
 

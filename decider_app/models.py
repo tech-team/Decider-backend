@@ -188,7 +188,6 @@ class CommentLike(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
 
     def __unicode__(self):
         return "Like for comment #" + str(self.comment.id) + \

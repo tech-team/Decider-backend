@@ -12,6 +12,7 @@ def truncate_all():
     Category.objects.all().delete()
     Locale.objects.all().delete()
     Picture.objects.all().delete()
+    LocaleCategory.objects.all().delete()
 
 
 @transaction.atomic

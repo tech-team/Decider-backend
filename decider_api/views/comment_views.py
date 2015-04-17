@@ -52,6 +52,8 @@ class CommentEndpoint(ProtectedResourceView):
                 "is_anonymous": comment.is_anonymous,
                 "author": get_short_user_data(request.resource_owner)
             }
+            question.comments_count += 1
+            question.save()
             return build_response(httplib.CREATED, CODE_CREATED, "Comment added", data=data)
 
         except Exception as e:

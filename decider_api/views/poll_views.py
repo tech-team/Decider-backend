@@ -11,8 +11,6 @@ from decider_app.views.utils.response_codes import CODE_INVALID_DATA, CODE_CREAT
 
 
 class PollEndpoint(ProtectedResourceView):
-    def get(self, request, *args, **kwargs):
-        pass
 
     @transaction.atomic
     @require_post_data(['poll_id', 'poll_item_id'])
@@ -33,7 +31,7 @@ class PollEndpoint(ProtectedResourceView):
                 return build_error_response(httplib.NOT_FOUND, CODE_UNKNOWN_POLL_ITEM,
                                             "Poll item with specified id was not found")
 
-            vote, created = Vote.objects.get_or_create(poll_id=p_id, poll_item_id=pi_id,
+            vote, created = Vote.objects.get_or_create(poll_id=poll.id, poll_item_id=pi.id,
                                                        user=request.resource_owner)
             if created:
                 pi.votes_count += 1
