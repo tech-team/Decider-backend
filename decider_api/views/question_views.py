@@ -105,7 +105,8 @@ class QuestionsEndpoint(ProtectedResourceView):
 
         except Exception as e:
             logger.exception(e)
-            return build_error_response(httplib.BAD_REQUEST, CODE_INVALID_DATA, "Failed to list questions")
+            return build_error_response(httplib.INTERNAL_SERVER_ERROR,
+                                        CODE_SERVER_ERROR, "Failed to fetch questions")
 
     @transaction.atomic
     @require_post_data(['text', 'poll', 'category_id'])
@@ -169,7 +170,8 @@ class QuestionsEndpoint(ProtectedResourceView):
             return build_response(httplib.CREATED, CODE_CREATED, "Question added", data)
         except Exception as e:
             logger.exception(e)
-            return build_error_response(httplib.BAD_REQUEST, CODE_INVALID_DATA, "Failed to create question")
+            return build_error_response(httplib.INTERNAL_SERVER_ERROR,
+                                        CODE_SERVER_ERROR, "Failed to create question")
 
 
 class QuestionDetailsEndpoint(ProtectedResourceView):
@@ -235,5 +237,5 @@ class QuestionDetailsEndpoint(ProtectedResourceView):
 
         except Exception as e:
             logger.exception(e)
-            return build_error_response(httplib.BAD_REQUEST, CODE_INVALID_DATA,
+            return build_error_response(httplib.INTERNAL_SERVER_ERROR, CODE_SERVER_ERROR,
                                         "Failed to get question details")

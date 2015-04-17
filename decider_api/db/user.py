@@ -9,11 +9,15 @@ QUERY = """SELECT d_user.id, d_user.uid, d_user.email, d_user.username,
               LEFT JOIN d_country ON d_user.country_id = d_country.id
               LEFT JOIN d_picture ON d_user.avatar_id = d_picture.id"""
 
+WHERE = " WHERE d_user.id = {}"
+
+
 
 def get_user_data(user_id):
     cursor = connection.cursor()
 
-    where = " WHERE d_user.id = %s" % user_id
+    where = WHERE.format(user_id)
+
     query = QUERY + where
     cursor.execute(query)
     user = cursor.fetchone()

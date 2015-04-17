@@ -2,6 +2,7 @@
 import httplib
 import urllib
 import urllib2
+import uuid
 from django.contrib.auth import authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
@@ -90,7 +91,7 @@ def registration(request):
                     return build_error_response(httplib.FORBIDDEN, CODE_INVALID_CREDENTIALS,
                                                 "Invalid credentials")
             except User.DoesNotExist:
-                user = User.objects.create(email=email)
+                user = User.objects.create(email=email, uid=uuid.uuid4().hex)
                 user.set_password(request.POST.get("password"))
                 user.save()
 
@@ -111,7 +112,8 @@ def registration(request):
                     return build_error_response(httplib.FORBIDDEN, CODE_INVALID_CREDENTIALS,
                                                 "Invalid credentials")
             except User.DoesNotExist:
-                user = User.objects.create(social_id=social_id, social_site=social_site)
+                user = User.objects.create(social_id=social_id, social_site=social_site,
+                                           uid=uuid.uuid4().hex)
                 user.email = user.uid
                 user.set_password(request.POST.get("password"))
                 user.save()

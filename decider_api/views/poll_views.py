@@ -7,7 +7,7 @@ from decider_api.utils.endpoint_decorators import require_post_data
 from decider_app.models import Vote, Poll, PollItem
 from decider_app.views.utils.response_builder import build_error_response, build_response
 from decider_app.views.utils.response_codes import CODE_INVALID_DATA, CODE_CREATED, CODE_UNKNOWN_POLL, \
-    CODE_UNKNOWN_POLL_ITEM
+    CODE_UNKNOWN_POLL_ITEM, CODE_SERVER_ERROR
 
 
 class PollEndpoint(ProtectedResourceView):
@@ -30,6 +30,9 @@ class PollEndpoint(ProtectedResourceView):
                 logger.warning("Poll item " + str(pi_id) + " did not match poll " + str(p_id))
                 return build_error_response(httplib.NOT_FOUND, CODE_UNKNOWN_POLL_ITEM,
                                             "Poll item with specified id was not found")
+            except Exception:
+                return build_error_response(httplib.BAD_REQUEST, CODE_INVALID_DATA,
+                                            "Some fields are invalid")
 
             vote, created = Vote.objects.get_or_create(poll_id=poll.id, poll_item_id=pi.id,
                                                        user=request.resource_owner)
@@ -38,7 +41,9 @@ class PollEndpoint(ProtectedResourceView):
                 pi.save()
             extra_fields = {'votes_count': pi.votes_count}
 
-            return build_response(httplib.CREATED, CODE_CREATED, "Success", extra_fields=extra_fields)
+            return build_response(httplib.CREATED, CODE_CREATED, "Voted successfully",
+                                  extra_fields=extra_fields)
         except Exception as e:
             logger.exception(e)
-            return build_error_response(httplib.BAD_REQUEST, CODE_INVALID_DATA, "Failed to vote")
+            return build_error_response(httplib.INTERNAL_SERVER_ERROR,
+                                        CODE_SERVER_ERROR, "Failed to vote")

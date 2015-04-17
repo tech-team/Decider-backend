@@ -7,7 +7,8 @@ from decider_api.utils.endpoint_decorators import require_post_data
 from decider_api.utils.helper import get_short_user_data
 from decider_app.models import Question, Comment
 from decider_app.views.utils.response_builder import build_error_response, build_response
-from decider_app.views.utils.response_codes import CODE_INVALID_DATA, CODE_UNKNOWN_QUESTION, CODE_CREATED
+from decider_app.views.utils.response_codes import CODE_INVALID_DATA, CODE_UNKNOWN_QUESTION, CODE_CREATED, \
+    CODE_SERVER_ERROR
 
 
 class CommentEndpoint(ProtectedResourceView):
@@ -58,5 +59,5 @@ class CommentEndpoint(ProtectedResourceView):
 
         except Exception as e:
             logger.exception(e)
-            return build_error_response(httplib.BAD_REQUEST, CODE_INVALID_DATA, "Failed to comment")
+            return build_error_response(httplib.INTERNAL_SERVER_ERROR, CODE_SERVER_ERROR, "Failed to comment")
 
