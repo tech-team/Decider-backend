@@ -89,7 +89,6 @@ def fill_db(request):
     pi2 = PollItem.objects.create(poll=poll1, question=q1, text="pi2")
     pi3 = PollItem.objects.create(poll=poll2, question=q2, text="pi3")
     pi4 = PollItem.objects.create(poll=poll2, question=q2, text="pi4", picture=picture2)
-    pi5 = PollItem.objects.create(poll=poll2, question=q2, text="pi5")
 
     """ COMMENTS """
     comm1 = Comment.objects.create(question=q1, author=user1, text="hallo")
@@ -114,7 +113,7 @@ def fill_db(request):
     pi3.save()
 
     """ COMMENT LIKES """
-    cl1 = CommentLike.objects.create(comment=comm1, question=q1, user=user1)
+    cl1 = CommentLike.objects.create(comment=comm1, user=user1)
     comm1.likes_count += 1
     comm1.save()
 

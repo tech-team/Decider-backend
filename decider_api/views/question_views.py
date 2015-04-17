@@ -66,7 +66,7 @@ class QuestionsEndpoint(ProtectedResourceView):
                 if poll_id:
                     polls.append(poll_id)
 
-            poll_items_list, pi_columns = get_poll_items(polls)
+            poll_items_list, pi_columns = get_poll_items(request.resource_owner.id, polls)
 
             poll_items = {}
             for poll_item_row in poll_items_list:
@@ -75,7 +75,8 @@ class QuestionsEndpoint(ProtectedResourceView):
                     'id': poll_item_row[pi_columns.index('id')],
                     'text': poll_item_row[pi_columns.index('text')],
                     'image_url': poll_item_row[pi_columns.index('image_url')],
-                    'votes_count': poll_item_row[pi_columns.index('votes_count')]
+                    'votes_count': poll_item_row[pi_columns.index('votes_count')],
+                    'voted': True if poll_item_row[pi_columns.index('voted')] else False
                 }
 
                 if not poll_items.get(q_id):
@@ -92,7 +93,8 @@ class QuestionsEndpoint(ProtectedResourceView):
                     'comments_count': question_row[q_columns.index('comments_count')],
                     'author': get_short_user_row_data(question_row, q_columns, 'author'),
                     'poll': poll_items.get(question_row[q_columns.index('id')]),
-                    'is_anonymous': question_row[q_columns.index('is_anonymous')]
+                    'is_anonymous': question_row[q_columns.index('is_anonymous')],
+                    'voted': True if question_row[q_columns.index('voted')] else False
                 }
 
                 questions.append(question)
@@ -182,7 +184,7 @@ class QuestionDetailsEndpoint(ProtectedResourceView):
                 return build_error_response(httplib.BAD_REQUEST, CODE_INVALID_DATA,
                                             "Some fields are invalid", ["question_id"])
 
-            question_row, q_columns = get_question(q_id)
+            question_row, q_columns = get_question(request.resource_owner.id, q_id)
             if question_row is None:
                 return build_error_response(httplib.NOT_FOUND, CODE_UNKNOWN_QUESTION,
                                             "Question with specified id was not found")
@@ -194,26 +196,28 @@ class QuestionDetailsEndpoint(ProtectedResourceView):
                 'category_id': question_row[q_columns.index('category_id')],
                 'author': get_short_user_row_data(question_row, q_columns, 'author'),
                 'likes_count': question_row[q_columns.index('likes_count')],
-                'is_anonymous': question_row[q_columns.index('is_anonymous')]
+                'is_anonymous': question_row[q_columns.index('is_anonymous')],
+                'voted': True if question_row[q_columns.index('voted')] else False
             }
 
             poll_id = question_row[q_columns.index('poll_id')]
             if poll_id:
                 question['poll'] = []
-                poll_items_list, pi_columns = get_poll_items([poll_id])
+                poll_items_list, pi_columns = get_poll_items(request.resource_owner.id, [poll_id])
                 for poll_item_row in poll_items_list:
                     question['poll'].append({
                         'id': poll_item_row[pi_columns.index('id')],
                         'text': poll_item_row[pi_columns.index('text')],
                         'image_url': poll_item_row[pi_columns.index('image_url')],
-                        'votes_count': poll_item_row[pi_columns.index('votes_count')]
+                        'votes_count': poll_item_row[pi_columns.index('votes_count')],
+                        'voted': True if poll_item_row[pi_columns.index('voted')] else False
                     })
             else:
                 question['poll'] = None
 
             if question_row[q_columns.index('comments_count')] > 0:
                 comments = []
-                comments_list, c_columns = get_comments([question['id']])
+                comments_list, c_columns = get_comments(request.resource_owner.id, [question['id']])
                 for comment_row in comments_list:
                     comments.append({
                         'id': comment_row[c_columns.index('id')],
@@ -221,6 +225,7 @@ class QuestionDetailsEndpoint(ProtectedResourceView):
                         'creation_date': comment_row[c_columns.index('creation_date')],
                         'likes_count': comment_row[c_columns.index('likes_count')],
                         'author': get_short_user_row_data(question_row, q_columns, 'author'),
+                        'voted': True if comment_row[c_columns.index('voted')] else False
                     })
                 question['comments'] = comments
             else:

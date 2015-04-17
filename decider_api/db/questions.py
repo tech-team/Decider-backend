@@ -13,21 +13,24 @@ QUERY = """SELECT d_question.id, d_question.text, d_question.creation_date,
                   d_question.likes_count, d_question.comments_count, d_question.is_anonymous,
                   d_user.first_name as author_first_name, d_user.last_name as author_last_name,
                   d_user.middle_name as author_middle_name, d_user.username as author_username,
-                  d_user.uid as author_uid, d_picture.url as author_image_url
+                  d_user.uid as author_uid, d_picture.url as author_image_url,
+                  d_question_likes.id as voted
            FROM d_question
               LEFT JOIN d_user ON d_question.author_id = d_user.id
               LEFT JOIN d_picture ON d_picture.id = d_user.avatar_id
-              LEFT JOIN d_poll ON d_question.id = d_poll.question_id"""
+              LEFT JOIN d_poll ON d_question.id = d_poll.question_id
+              LEFT JOIN d_question_likes ON d_question_likes.question_id = d_question.id
+                                        AND d_question_likes.user_id = {}"""
 
 WHERE = " WHERE 1=1"
 
-GROUP_BY = " GROUP BY d_question.id, d_poll.id, d_user.id, d_picture.url"
+GROUP_BY = " GROUP BY d_question.id, d_poll.id, d_user.id, d_picture.url, d_question_likes.id"
 
 
 def get_questions(*args, **kwargs):
     cursor = connection.cursor()
 
-    query = QUERY + WHERE
+    query = QUERY.format(kwargs.get('user_id')) + WHERE
     if kwargs.get('categories'):
         category_ids = (', '.join([str(x) for x in kwargs.get('categories')]))
         query += ' AND d_question.category_id IN (%s)' % category_ids
@@ -53,27 +56,30 @@ def get_questions(*args, **kwargs):
 
 def get_new_questions(*args, **kwargs):
     extras = GROUP_BY + " ORDER BY d_question.creation_date DESC"
-    return get_questions(limit=kwargs.get('limit'), offset=kwargs.get('offset'),
+    return get_questions(user_id=kwargs.get('user_id'),
+                         limit=kwargs.get('limit'), offset=kwargs.get('offset'),
                          categories=kwargs.get('categories'), extras=extras)
 
 
 def get_popular_questions(*args, **kwargs):
     extras = GROUP_BY + " ORDER BY likes_count DESC"
-    return get_questions(limit=kwargs.get('limit'), offset=kwargs.get('offset'),
+    return get_questions(user_id=kwargs.get('user_id'),
+                         limit=kwargs.get('limit'), offset=kwargs.get('offset'),
                          categories=kwargs.get('categories'), extras=extras)
 
 
-def get_my_questions(user_id, *args, **kwargs):
-    where = [" d_question.author_id=%s" % user_id]
+def get_my_questions(*args, **kwargs):
+    where = [" d_question.author_id=%s" % kwargs.get('user_id')]
     extras = GROUP_BY + " ORDER BY d_question.creation_date DESC"
-    return get_questions(limit=kwargs.get('limit'), offset=kwargs.get('offset'),
+    return get_questions(user_id=kwargs.get('user_id'),
+                         limit=kwargs.get('limit'), offset=kwargs.get('offset'),
                          categories=kwargs.get('categories'), where=where, extras=extras)
 
 
-def get_question(q_id):
+def get_question(user_id, q_id):
     extras = " WHERE d_question.id=%s" % q_id
     cursor = connection.cursor()
-    cursor.execute(QUERY + extras)
+    cursor.execute(QUERY.format(user_id) + extras)
     question = cursor.fetchone()
     columns = [i[0] for i in cursor.description]
     cursor.close()
