@@ -27,19 +27,21 @@ class VoteEndpoint(ProtectedResourceView):
                 return build_error_response(httplib.BAD_REQUEST, CODE_INVALID_ENTITY,
                                             "Invalid entity")
 
-            res = get_vote(entity, entity_id, request.resource_owner.id)
+            res, likes = get_vote(entity, entity_id, request.resource_owner.id)
             if res == I_CODE_UNKNOWN_ENTITY:
                 return build_error_response(httplib.NOT_FOUND, CODE_UNKNOWN_ENTITY,
                                             msg="Unknown entity")
 
             if res == I_CODE_ALREADY_VOTED:
                 return build_response(httplib.CREATED, CODE_CREATED,
-                                      msg="Vote successful", data={'entity_id': entity_id})
+                                      msg="Vote successful", data={'entity_id': entity_id,
+                                                                   'likes_count': likes[0]})
 
-            insert_vote(entity, entity_id, request.resource_owner.id)
+            likes = insert_vote(entity, entity_id, request.resource_owner.id)
 
             return build_response(httplib.CREATED, CODE_CREATED,
-                                  msg="Vote successful",  data={'entity_id': entity_id})
+                                  msg="Vote successful",  data={'entity_id': entity_id,
+                                                                'likes_count': likes[0]})
 
         except Exception as e:
             logger.exception(e)

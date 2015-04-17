@@ -18,19 +18,27 @@ ENTITY_UPDATE_QUERY = """UPDATE d_{0}
                          SET likes_count = likes_count + 1
                          WHERE id = {1}"""
 
+LIKES_QUERY = """SELECT likes_count
+                 FROM d_{0}
+                 WHERE id = {1}"""
+
 
 def get_vote(entity, entity_id, user_id):
     cursor = connection.cursor()
 
     cursor.execute(GET_QUERY.format(entity, user_id, entity_id))
     res = cursor.fetchone()
-    cursor.close()
+
     if res is None:
-        return I_CODE_UNKNOWN_ENTITY
+        cursor.close()
+        return I_CODE_UNKNOWN_ENTITY, None
     elif res[1] is not None:
-        return I_CODE_ALREADY_VOTED
+        cursor.execute(LIKES_QUERY.format(entity, entity_id))
+        res = cursor.fetchone()
+        return I_CODE_ALREADY_VOTED, res
     else:
-        return I_CODE_VOTE_OK
+        cursor.close()
+        return I_CODE_VOTE_OK, None
 
 
 def insert_vote(entity, entity_id, user_id):
@@ -38,7 +46,8 @@ def insert_vote(entity, entity_id, user_id):
 
     cursor.execute(INSERT_QUERY.format(entity, user_id, entity_id))
     cursor.execute(ENTITY_UPDATE_QUERY.format(entity, entity_id))
-
+    cursor.execute(LIKES_QUERY.format(entity, entity_id))
+    res = cursor.fetchone()
     cursor.close()
 
-    return
+    return res
