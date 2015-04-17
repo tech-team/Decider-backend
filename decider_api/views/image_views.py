@@ -2,13 +2,10 @@ from PIL import Image
 import httplib
 import uuid
 import os
-import random
-import string
 from django.db import transaction
 from django.utils import timezone
 from oauth2_provider.views import ProtectedResourceView
 from decider_api.log_manager import logger
-from decider_api.utils.endpoint_decorators import require_post_data
 from decider_app.models import Picture
 from decider_app.views.utils.response_builder import build_error_response, build_response
 from decider_app.views.utils.response_codes import CODE_IMAGE_UPLOAD_FAILED, CODE_BAD_IMAGE, CODE_CREATED
