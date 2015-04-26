@@ -229,6 +229,7 @@ class Vote(models.Model):
         verbose_name = _(u'Голос')
         verbose_name_plural = _(u'Голоса')
         db_table = "d_vote"
+        unique_together = ('user', 'poll')
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     poll_item = models.ForeignKey(PollItem, on_delete=models.CASCADE)

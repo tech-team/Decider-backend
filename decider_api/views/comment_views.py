@@ -42,7 +42,8 @@ class CommentEndpoint(ProtectedResourceView):
                 return build_error_response(httplib.BAD_REQUEST, CODE_UNKNOWN_QUESTION,
                                             "Question is unknown")
 
-            comment = Comment.objects.create(text=text, question=question, is_anonymous=is_anonymous,
+            comment = Comment.objects.create(text=text, question=question,
+                                             is_anonymous=is_anonymous,
                                              author=request.resource_owner)
 
             data = {

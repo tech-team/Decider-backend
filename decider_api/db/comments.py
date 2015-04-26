@@ -1,6 +1,6 @@
 from django.db import connection
 
-QUERY = """ SELECT d_comment.id, d_comment.text, d_comment.creation_date, d_comment.likes_count,
+SELECT_QUERY = """ SELECT d_comment.id, d_comment.text, d_comment.creation_date, d_comment.likes_count,
                 author_user.first_name as author_first_name, author_user.last_name as author_last_name,
                 author_user.middle_name as author_middle_name, author_user.username as author_username,
                 author_picture.url as author_image_url, author_user.id as author_id, author_user.uid as author_uid,
@@ -17,7 +17,7 @@ def get_comments(user_id, q_ids):
     cursor = connection.cursor()
 
     q_ids = (', '.join([str(x) for x in q_ids]))
-    cursor.execute(QUERY % (user_id, q_ids,))
+    cursor.execute(SELECT_QUERY % (user_id, q_ids,))
     c_list = cursor.fetchall()
     columns = [i[0] for i in cursor.description]
     cursor.close()
