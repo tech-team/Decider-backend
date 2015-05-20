@@ -3,7 +3,7 @@ import httplib
 import urllib
 import urllib2
 import uuid
-from django.contrib.auth import authenticate, logout
+from django.contrib.auth import authenticate, logout, login
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.shortcuts import redirect
@@ -38,7 +38,7 @@ def get_token_data(email, password):
 
 
 @require_http_methods(['POST'])
-def login(request):
+def login_view(request):
     email = request.POST.get('email')
 
     social_name = request.POST.get('social_name')
@@ -73,9 +73,8 @@ def login(request):
         return build_error_response(httplib.BAD_REQUEST, CODE_INSUFFICIENT_CREDENTIALS, 'Some fields are not filled')
 
 
-@transaction.atomic
 @require_http_methods(['POST'])
-def registration(request):
+def registration_view(request):
     email = request.POST.get('email')
 
     social_name = request.POST.get('social_name')
@@ -86,15 +85,13 @@ def registration(request):
         if email:
             try:
                 User.objects.get(email=email)
-                user = authenticate(email=email, password=password)
-                if not user:
-                    return build_error_response(httplib.FORBIDDEN, CODE_INVALID_CREDENTIALS,
-                                                "Invalid credentials")
+
             except User.DoesNotExist:
-                user = User.objects.create(email=email, uid=uuid.uuid4().hex)
-                user.set_password(request.POST.get("password"))
+                user = User(email=email, uid=uuid.uuid4().hex)
+                user.set_password(password)
                 user.save()
 
+            user = authenticate(email=email, password=password)
         else:
             social_name = str(social_name)
             social_id = str(social_id)
@@ -106,17 +103,19 @@ def registration(request):
 
             try:
                 User.objects.get(social_id=social_id, social_site=social_site)
-                user = authenticate(social_id=social_id, social_site=social_site,
-                                    password=password)
-                if not user:
-                    return build_error_response(httplib.FORBIDDEN, CODE_INVALID_CREDENTIALS,
-                                                "Invalid credentials")
+
             except User.DoesNotExist:
-                user = User.objects.create(social_id=social_id, social_site=social_site,
-                                           uid=uuid.uuid4().hex)
+                user = User(social_id=social_id, social_site=social_site,
+                            uid=uuid.uuid4().hex)
                 user.email = user.uid
-                user.set_password(request.POST.get("password"))
+                user.set_password(password)
                 user.save()
+
+            user = authenticate(social_id=social_id, social_site=social_site,
+                                password=password)
+        if not user:
+            return build_error_response(httplib.FORBIDDEN, CODE_INVALID_CREDENTIALS,
+                                        "Invalid credentials")
 
         data = get_token_data(user.email, password)
         if not data:
