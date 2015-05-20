@@ -21,4 +21,4 @@ def get_short_user_row_data(row, columns, prefix):
         'last_name': row[columns.index(prefix + '_last_name')],
         'middle_name': row[columns.index(prefix + '_middle_name')],
         'avatar': row[columns.index(prefix + '_image_url')]
-    },
+    }
