@@ -10,6 +10,8 @@ from django.shortcuts import redirect
 from django.views.decorators.http import require_http_methods
 
 import json
+from oauth2_provider.views import ProtectedResourceView
+from decider_api.utils.endpoint_decorators import require_params
 from decider_app.models import User, SocialSite
 from decider_app.views.utils.auth_helper import build_token_request_data, get_token_url
 from decider_app.views.utils.response_builder import build_response, build_error_response
@@ -127,6 +129,13 @@ def registration_view(request):
     else:
         return build_error_response(httplib.BAD_REQUEST, CODE_INSUFFICIENT_CREDENTIALS,
                                     'Some fields are not filled')
+
+
+class RefreshTokenEndpoint(ProtectedResourceView):
+    @require_params(['refresh_token'])
+    def get(self, request, *args, **kwargs):
+
+        return build_response(httplib.OK, CODE_OK, "Here is your token")
 
 
 @login_required(login_url='/login/')

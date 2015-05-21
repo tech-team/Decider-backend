@@ -4,12 +4,12 @@ from decider_app.views.utils.response_builder import build_error_response
 from decider_app.views.utils.response_codes import CODE_REQUIRED_PARAMS_MISSING, CODE_INVALID_DATA
 
 
-def require_get_params(*params):
+def require_params(*params):
     def decorator(func):
         def wrapped(request, *args, **kwargs):
             errors = []
             for param in params[0]:
-                if args[0].GET.get(param) is None:
+                if getattr(args[0], args[0].method).get(param) is None:
                     errors.append(param)
 
             if errors:

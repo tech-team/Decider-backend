@@ -6,7 +6,7 @@ from decider_api.db.comments import get_comments
 from decider_api.db.poll_items import get_poll_items
 from decider_api.db.questions import tab_switch, get_question
 from decider_api.log_manager import logger
-from decider_api.utils.endpoint_decorators import require_post_data, require_get_params
+from decider_api.utils.endpoint_decorators import require_post_data, require_params
 from decider_api.utils.helper import get_short_user_data, get_short_user_row_data
 from decider_app.models import Question, Category, User, Poll, PollItem, Picture
 from decider_app.views.utils.response_builder import build_response, build_error_response

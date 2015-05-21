@@ -137,7 +137,8 @@ USE_TZ = True
 
 MEDIA_ROOT = get_config_opt(config, 'common', 'MEDIA_ROOT', os.path.join(APP_DIR, 'media'))
 
-STATIC_URL = os.path.join(APP_DIR, '/static/')
+STATIC_ROOT = os.path.join(BASE_DIR, "collected_static")
+STATIC_URL = '/static/'
 
 TEMPLATE_DIRS = (
     os.path.join(BASE_DIR,  'templates'),
