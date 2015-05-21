@@ -36,8 +36,13 @@ class UserDataEndpoint(ProtectedResourceView):
 
 class UserEditEndpoint(ProtectedResourceView):
 
-    EDITABLE_FIELDS = []
+    EDITABLE_FIELDS = ['first_name', 'last_name', 'middle_name',
+                       'is_anonymous', 'gender', 'birthday',
+                       'about', 'country', 'city', 'avatar']
 
     def post(self, request, *args, **kwargs):
         user = request.resource_owner
+
+        data = request.POST.get('data')
+
         return build_response(httplib.CREATED, CODE_CREATED, "VASYA", {'email': user.email})
