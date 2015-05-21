@@ -203,7 +203,7 @@ class Poll(models.Model):
         verbose_name_plural = _(u'Голосовалки')
         db_table = "d_poll"
 
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    question = models.OneToOneField(Question, on_delete=models.CASCADE)
     items_count = models.SmallIntegerField(_(u'Количество вариантов'), default=0)
 
     def __unicode__(self):
