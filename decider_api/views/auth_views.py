@@ -3,40 +3,17 @@ import httplib
 import urllib
 import urllib2
 import uuid
-from django.contrib.auth import authenticate, logout, login
+from django.contrib.auth import authenticate, logout
 from django.contrib.auth.decorators import login_required
-from django.db import transaction
 from django.shortcuts import redirect
 from django.views.decorators.http import require_http_methods
-
-import json
-from oauth2_provider.views import ProtectedResourceView
 from decider_api.utils.endpoint_decorators import require_params
+
 from decider_app.models import User, SocialSite
-from decider_app.views.utils.auth_helper import build_token_request_data, get_token_url
+from decider_app.views.utils.auth_helper import get_token_data
 from decider_app.views.utils.response_builder import build_response, build_error_response
-from decider_api.log_manager import logger
 from decider_app.views.utils.response_codes import CODE_OK, CODE_INVALID_CREDENTIALS, CODE_LOGIN_FAILED, \
-    CODE_INSUFFICIENT_CREDENTIALS, CODE_UNKNOWN_SOCIAL
-
-
-def get_token_data(email, password):
-    try:
-        post_data = urllib.urlencode(build_token_request_data(email, password))
-        token_response = urllib2.urlopen(urllib2.Request(get_token_url(), data=post_data))
-        token_data = json.loads(token_response.read())
-        if not token_data:
-            return False
-
-        data = {
-            'access_token': token_data.get('access_token'),
-            'expires': token_data.get('expires_in'),
-            'refresh_token': token_data.get('refresh_token')
-        }
-        return data
-    except Exception as e:
-        logger.exception(e)
-        return False
+    CODE_INSUFFICIENT_CREDENTIALS, CODE_UNKNOWN_SOCIAL, CODE_REQUIRED_PARAMS_MISSING, CODE_INVALID_TOKEN
 
 
 @require_http_methods(['POST'])
@@ -65,7 +42,13 @@ def login_view(request):
         if not user:
             return build_error_response(httplib.FORBIDDEN, CODE_INVALID_CREDENTIALS, 'Invalid credentials')
         else:
-            data = get_token_data(user.email, password)
+            data = get_token_data(
+                'password',
+                {
+                    'email': user.email,
+                    'password': password
+                }
+            )
             if not data:
                 return build_error_response(httplib.INTERNAL_SERVER_ERROR, CODE_LOGIN_FAILED, "Login failed")
             else:
@@ -119,7 +102,13 @@ def registration_view(request):
             return build_error_response(httplib.FORBIDDEN, CODE_INVALID_CREDENTIALS,
                                         "Invalid credentials")
 
-        data = get_token_data(user.email, password)
+        data = get_token_data(
+            'password',
+            {
+                'email': user.email,
+                'password': password
+            }
+        )
         if not data:
             return build_error_response(httplib.INTERNAL_SERVER_ERROR, CODE_LOGIN_FAILED, "Registration failed")
         else:
@@ -131,11 +120,25 @@ def registration_view(request):
                                     'Some fields are not filled')
 
 
-class RefreshTokenEndpoint(ProtectedResourceView):
-    @require_params(['refresh_token'])
-    def get(self, request, *args, **kwargs):
+@require_http_methods(['GET'])
+def refresh_token_view(request):
+    refresh_token = request.GET.get('refresh_token')
+    if not refresh_token:
+        return build_error_response(httplib.BAD_REQUEST, CODE_REQUIRED_PARAMS_MISSING,
+                                    "Required params are missing", ['refresh_token'])
 
-        return build_response(httplib.OK, CODE_OK, "Here is your token")
+    data = get_token_data(
+        'refresh_token',
+        {
+            'token': refresh_token
+        }
+    )
+
+    if not data:
+        return build_error_response(httplib.FORBIDDEN, CODE_INVALID_TOKEN,
+                                    "Invalid refresh token")
+
+    return build_response(httplib.OK, CODE_OK, "Here is your fresh token", data)
 
 
 @login_required(login_url='/login/')

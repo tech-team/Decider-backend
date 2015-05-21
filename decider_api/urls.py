@@ -1,6 +1,5 @@
 from django.conf.urls import url, patterns, include
 from decider_api.views import auth_views, temp_views
-from decider_api.views.auth_views import RefreshTokenEndpoint
 from decider_api.views.category_views import CategoriesEndpoint
 from decider_api.views.comment_views import CommentEndpoint
 from decider_api.views.image_views import ImagesEndpoint
@@ -14,7 +13,7 @@ urlpatterns = patterns('',
 
     url(r'^login/?$', auth_views.login_view, name="login"),
     url(r'^registration/?$', auth_views.registration_view, name="registration"),
-    url(r'^refresh_token/?$', RefreshTokenEndpoint.as_view(), name="refresh_token"),
+    url(r'^refresh_token/?$', auth_views.refresh_token_view, name="refresh_token"),
 
     url(r'^user/(?P<user_id>[0-9]+)/?$', UserDataEndpoint.as_view(), name="user"),
     url(r'^edit/?$', UserEditEndpoint.as_view(), name="edit"),
