@@ -263,5 +263,3 @@ SOCIAL_AUTH_PIPELINE = (
     # Update the user record with any changed info from the auth service.
     'social.pipeline.user.user_details'
 )
-
-IMAGE_SIZE = (250, 250)

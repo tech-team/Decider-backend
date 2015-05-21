@@ -72,6 +72,7 @@ class Picture(models.Model):
 
     uid = models.CharField(max_length=100, unique=True, verbose_name=u'Уникальный идентификатор')
     url = models.CharField(max_length=255, verbose_name=u'Адрес картинки')
+    preview_url = models.CharField(max_length=255, verbose_name=u'Адрес превью', null=True, blank=True)
     date_uploaded = models.DateTimeField(default=timezone.now, verbose_name=u'Дата загрузки')
 
 
