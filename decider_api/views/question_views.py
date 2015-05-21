@@ -75,6 +75,7 @@ class QuestionsEndpoint(ProtectedResourceView):
                     'id': poll_item_row[pi_columns.index('id')],
                     'text': poll_item_row[pi_columns.index('text')],
                     'image_url': poll_item_row[pi_columns.index('image_url')],
+                    'preview_url': poll_item_row[pi_columns.index('preview_url')],
                     'votes_count': poll_item_row[pi_columns.index('votes_count')],
                     'voted': True if poll_item_row[pi_columns.index('voted')] else False
                 }
@@ -138,7 +139,7 @@ class QuestionsEndpoint(ProtectedResourceView):
             for poll_item in poll:
                 text = poll_item.get('text')
                 try:
-                    picture = Picture.objects.get(uid=poll_item.get('picture'))
+                    picture = Picture.objects.get(uid=poll_item.get('image_uid'))
                 except Picture.DoesNotExist:
                     picture = None
                 except Exception as e:
@@ -154,7 +155,8 @@ class QuestionsEndpoint(ProtectedResourceView):
                 data_poll.append({
                     'id': pi.id,
                     'text': pi.text,
-                    'image_url': pi.picture.url if pi.picture else None
+                    'image_url': pi.picture.url if pi.picture else None,
+                    'preview_url': pi.picture.preview_url if pi.picture else None
                 })
 
             data = {
@@ -211,6 +213,7 @@ class QuestionDetailsEndpoint(ProtectedResourceView):
                         'id': poll_item_row[pi_columns.index('id')],
                         'text': poll_item_row[pi_columns.index('text')],
                         'image_url': poll_item_row[pi_columns.index('image_url')],
+                        'preview_url': poll_item_row[pi_columns.index('preview_url')],
                         'votes_count': poll_item_row[pi_columns.index('votes_count')],
                         'voted': True if poll_item_row[pi_columns.index('voted')] else False
                     })

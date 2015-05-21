@@ -73,7 +73,7 @@ class ImagesEndpoint(ProtectedResourceView):
             return build_error_response(httplib.BAD_REQUEST, CODE_BAD_IMAGE,
                                         "Bad preview")
 
-        Picture.objects.create(url=url, uid=uid, preview_url=preview_url)
+        Picture.objects.create(url=os.path.join('media', url), uid=uid, preview_url=os.path.join('media', preview_url))
 
         return build_response(httplib.CREATED, CODE_CREATED, "Images uploaded",
                               data={'uid': uid})

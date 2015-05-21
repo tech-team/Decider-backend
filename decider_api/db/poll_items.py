@@ -1,7 +1,8 @@
 from django.db import connection
 
 QUERY = """ SELECT d_poll_item.id, d_poll_item.question_id, d_poll_item.text,
-                   d_picture.url as image_url, d_poll_item.votes_count, d_vote.id as voted
+                   d_picture.url as image_url, d_picture.preview_url as preview_url,
+                   d_poll_item.votes_count, d_vote.id as voted
             FROM d_poll_item
               LEFT JOIN d_picture ON d_poll_item.picture_id = d_picture.id
               LEFT JOIN d_vote ON d_vote.user_id = {}

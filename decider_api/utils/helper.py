@@ -43,7 +43,7 @@ def get_user_data(user):
         'is_active': user.is_active,
         'date_joined': user.date_joined,
         'last_login': user.last_login,
-        'country': user.country,
+        'country': user.country.name if user.country else None,
         'city': user.city,
         'birthday': user.birthday,
         'gender': user.gender,
