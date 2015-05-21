@@ -44,8 +44,8 @@ class ImagesEndpoint(ProtectedResourceView):
         preview_url = os.path.join(dirname, preview_filename)
 
         try:
-            if not os.path.exists(dirname):
-                os.makedirs(dirname)
+            if not os.path.exists(os.path.join(MEDIA_ROOT, dirname)):
+                os.makedirs(os.path.join(MEDIA_ROOT, dirname))
         except Exception as e:
             logger.exception(e)
             return build_error_response(httplib.INTERNAL_SERVER_ERROR, CODE_IMAGE_UPLOAD_FAILED,
