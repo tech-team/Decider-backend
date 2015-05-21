@@ -45,11 +45,11 @@ config.read(os.path.join("conf", PROJECT_NAME + ".conf"))
 SECRET_KEY = get_config_opt(config, 'django', 'SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = get_config_opt(config, 'common', 'DEBUG', True)
+DEBUG = True if get_config_opt(config, 'common', 'DEBUG', 'True') == 'True' else False
 
 TEMPLATE_DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
 

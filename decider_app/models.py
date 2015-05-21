@@ -130,13 +130,15 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class Category(models.Model):
+    name = models.CharField(max_length=100, verbose_name=u'Название', null=True, blank=True)
+
     class Meta:
         verbose_name = _(u'Категория')
         verbose_name_plural = _(u'Категории')
         db_table = "d_category"
 
     def __unicode__(self):
-        return self.name
+        return unicode(self.id) + '.' + (self.name if self.name else '')
 
 
 class Question(models.Model):
