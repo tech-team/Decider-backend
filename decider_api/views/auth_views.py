@@ -8,12 +8,13 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.views.decorators.http import require_http_methods
 from decider_api.utils.endpoint_decorators import require_params
+from decider_api.utils.helper import get_user_data
 
 from decider_app.models import User, SocialSite
 from decider_app.views.utils.auth_helper import get_token_data
 from decider_app.views.utils.response_builder import build_response, build_error_response
 from decider_app.views.utils.response_codes import CODE_OK, CODE_INVALID_CREDENTIALS, CODE_LOGIN_FAILED, \
-    CODE_INSUFFICIENT_CREDENTIALS, CODE_UNKNOWN_SOCIAL, CODE_REQUIRED_PARAMS_MISSING, CODE_INVALID_TOKEN
+    CODE_INSUFFICIENT_CREDENTIALS, CODE_UNKNOWN_SOCIAL, CODE_REQUIRED_PARAMS_MISSING, CODE_INVALID_TOKEN, CODE_CREATED
 
 
 @require_http_methods(['POST'])
@@ -52,7 +53,7 @@ def login_view(request):
             if not data:
                 return build_error_response(httplib.INTERNAL_SERVER_ERROR, CODE_LOGIN_FAILED, "Login failed")
             else:
-                data.update({'uid': user.uid})
+                data.update({'user': get_user_data(user)})
                 return build_response(httplib.OK, CODE_OK, "Login successful", data)
     else:
         return build_error_response(httplib.BAD_REQUEST, CODE_INSUFFICIENT_CREDENTIALS, 'Some fields are not filled')
@@ -112,7 +113,7 @@ def registration_view(request):
         if not data:
             return build_error_response(httplib.INTERNAL_SERVER_ERROR, CODE_LOGIN_FAILED, "Registration failed")
         else:
-            data.update({'uid': user.uid})
+            data.update({'user': get_user_data(user)})
             return build_response(httplib.OK, CODE_OK, "Registration successful", data)
 
     else:
@@ -120,7 +121,7 @@ def registration_view(request):
                                     'Some fields are not filled')
 
 
-@require_http_methods(['GET'])
+@require_http_methods(['POST'])
 def refresh_token_view(request):
     refresh_token = request.GET.get('refresh_token')
     if not refresh_token:
@@ -138,7 +139,7 @@ def refresh_token_view(request):
         return build_error_response(httplib.FORBIDDEN, CODE_INVALID_TOKEN,
                                     "Invalid refresh token")
 
-    return build_response(httplib.OK, CODE_OK, "Here is your fresh token", data)
+    return build_response(httplib.CREATED, CODE_CREATED, "Here is your fresh token", data)
 
 
 @login_required(login_url='/login/')
