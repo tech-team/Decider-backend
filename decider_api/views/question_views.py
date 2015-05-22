@@ -85,6 +85,10 @@ class QuestionsEndpoint(ProtectedResourceView):
                 poll_items[q_id].append(pi)
 
             for question_row in question_list:
+                poll = poll_items.get(question_row[q_columns.index('id')])
+                if poll:
+                    poll = sorted(poll, key=lambda k: k['id'])
+
                 question = {
                     'id': question_row[q_columns.index('id')],
                     'text': question_row[q_columns.index('text')],
@@ -93,7 +97,7 @@ class QuestionsEndpoint(ProtectedResourceView):
                     'likes_count': question_row[q_columns.index('likes_count')],
                     'comments_count': question_row[q_columns.index('comments_count')],
                     'author': get_short_user_row_data(question_row, q_columns, 'author'),
-                    'poll': poll_items.get(question_row[q_columns.index('id')]),
+                    'poll': poll,
                     'is_anonymous': question_row[q_columns.index('is_anonymous')],
                     'voted': True if question_row[q_columns.index('voted')] else False
                 }
@@ -217,6 +221,7 @@ class QuestionDetailsEndpoint(ProtectedResourceView):
                         'votes_count': poll_item_row[pi_columns.index('votes_count')],
                         'voted': True if poll_item_row[pi_columns.index('voted')] else False
                     })
+                question['poll'] = sorted(question['poll'], key=lambda k: k['id'])
             else:
                 question['poll'] = None
 
