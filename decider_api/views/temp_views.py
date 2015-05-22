@@ -1,7 +1,16 @@
 # coding=utf-8
+import httplib
 from django.db import transaction
+from django.db.models.loading import get_model
 from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+from decider_api.utils.endpoint_decorators import require_params
 from decider_app.models import *
+from decider_app.views.utils.response_builder import build_response, build_error_response
+from decider_app.views.utils.response_codes import CODE_OK, CODE_UNKNOWN_QUESTION, CODE_SERVER_ERROR, CODE_INVALID_DATA, \
+    CODE_UNKNOWN_ENTITY
+
+DELETEABLE_ENTITIES = ['question', 'comment', 'comment_like', 'vote', 'poll', 'poll_item']
 
 
 def truncate_all():
@@ -118,3 +127,26 @@ def fill_db(request):
     comm1.save()
 
     return JsonResponse({"status": "ok"}, status=201)
+
+
+@require_http_methods(['POST'])
+def delete_entity(request):
+    try:
+        entity = request.POST.get('entity')
+        entity_id = int(request.POST.get('entity_id'))
+        if entity and entity_id and entity in DELETEABLE_ENTITIES:
+            model = get_model('decider_app', entity)
+            if model:
+                try:
+                    model.objects.get(id=entity_id).delete()
+                except model.DoesNotExist:
+                    return build_error_response(httplib.BAD_REQUEST,
+                                                CODE_UNKNOWN_ENTITY, "No entity with that id")
+        else:
+            return build_error_response(httplib.BAD_REQUEST,
+                                        CODE_INVALID_DATA, "Your request sucks")
+    except:
+        return build_error_response(httplib.INTERNAL_SERVER_ERROR,
+                                    CODE_SERVER_ERROR, "Problems")
+
+    return build_response(httplib.OK, CODE_OK, "Successfully deleted entity")

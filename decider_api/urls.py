@@ -29,5 +29,6 @@ urlpatterns = patterns('',
     url(r'^logout/?$', auth_views.logout_view, name="logout_view"),
 
     # TODO: remove tmp
-    url(r'^tmp/fill_db/?$', temp_views.fill_db, name="fill_db")
+    url(r'^tmp/fill_db/?$', temp_views.fill_db, name="fill_db"),
+    url(r'^tmp/delete_entity/?$', temp_views.delete_entity, name="delete_question")
 )
