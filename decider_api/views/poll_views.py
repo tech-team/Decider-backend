@@ -4,7 +4,7 @@ from django.db import transaction, IntegrityError
 from oauth2_provider.views import ProtectedResourceView
 from decider_api.db.poll import vote_on_poll, check_poll_item
 from decider_api.log_manager import logger
-from decider_api.utils.endpoint_decorators import require_post_data
+from decider_api.utils.endpoint_decorators import require_post_data, require_params
 from decider_app.models import Vote, Poll, PollItem, Question
 from decider_app.views.utils.response_builder import build_error_response, build_response
 from decider_app.views.utils.response_codes import CODE_INVALID_DATA, CODE_CREATED, CODE_UNKNOWN_POLL, \
@@ -15,14 +15,13 @@ from decider_app.views.utils.response_codes import CODE_INVALID_DATA, CODE_CREAT
 class PollEndpoint(ProtectedResourceView):
 
     @transaction.atomic
-    @require_post_data(['question_id', 'poll_item_id'])
+    @require_params(['question_id', 'poll_item_id'])
     def post(self, request, *args, **kwargs):
         try:
-            data = json.loads(request.POST.get('data'))
 
             user_id = request.resource_owner.id
-            q_id = data.get('question_id')
-            pi_id = data.get('poll_item_id')
+            q_id = request.POST.get('question_id')
+            pi_id = request.POST.get('poll_item_id')
 
             try:
                 p = Question.objects.get(id=q_id).poll
