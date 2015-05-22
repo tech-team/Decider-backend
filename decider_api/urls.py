@@ -1,7 +1,7 @@
 from django.conf.urls import url, patterns, include
 from decider_api.views import auth_views, temp_views
 from decider_api.views.category_views import CategoriesEndpoint
-from decider_api.views.comment_views import CommentEndpoint
+from decider_api.views.comment_views import CommentsEndpoint
 from decider_api.views.image_views import ImagesEndpoint
 from decider_api.views.poll_views import PollEndpoint
 from decider_api.views.question_views import QuestionsEndpoint, QuestionDetailsEndpoint
@@ -23,7 +23,7 @@ urlpatterns = patterns('',
     url(r'^poll/?$', PollEndpoint.as_view(), name="poll"),
     url(r'^images/?$', ImagesEndpoint.as_view(), name="images"),
     url(r'^categories/?$', CategoriesEndpoint.as_view(), name="categories"),
-    url(r'^comment/?$', CommentEndpoint.as_view(), name="comment"),
+    url(r'^comments/?$', CommentsEndpoint.as_view(), name="comments"),
     url(r'^vote/?$', VoteEndpoint.as_view(), name="vote"),
 
     url(r'^logout/?$', auth_views.logout_view, name="logout_view"),

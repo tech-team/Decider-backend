@@ -222,7 +222,7 @@ class QuestionDetailsEndpoint(ProtectedResourceView):
 
             if question_row[q_columns.index('comments_count')] > 0:
                 comments = []
-                comments_list, c_columns = get_comments(request.resource_owner.id, [question['id']])
+                comments_list, c_columns = get_comments(request.resource_owner.id, question['id'])
                 for comment_row in comments_list:
                     comments.append({
                         'id': comment_row[c_columns.index('id')],

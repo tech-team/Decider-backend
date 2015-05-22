@@ -52,3 +52,22 @@ def get_user_data(user):
     })
 
     return data
+
+
+def RepresentsInt(s):
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False
+
+
+def check_params_types(params, cast_type=int):
+    errors = []
+    for param in params:
+        if params[param]:
+            try:
+                cast_type(params[param])
+            except ValueError:
+                errors.append(param)
+    return errors

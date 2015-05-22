@@ -8,16 +8,24 @@ SELECT_QUERY = """ SELECT d_comment.id, d_comment.text, d_comment.creation_date,
             FROM d_comment
             LEFT JOIN d_user as author_user ON d_comment.author_id = author_user.id
             LEFT JOIN d_picture as author_picture ON author_picture.id = author_user.avatar_id
-            LEFT JOIN d_comment_likes ON d_comment_likes.user_id = %s
+            LEFT JOIN d_comment_likes ON d_comment_likes.user_id = {0}
                   AND d_comment_likes.comment_id = d_comment.id
-            WHERE d_comment.question_id in (%s)"""
+            WHERE d_comment.question_id = {1}"""
 
 
-def get_comments(user_id, q_ids):
+def get_comments(user_id, q_id, order=None, limit=None, offset=None):
     cursor = connection.cursor()
 
-    q_ids = (', '.join([str(x) for x in q_ids]))
-    cursor.execute(SELECT_QUERY % (user_id, q_ids,))
+    query = SELECT_QUERY.format(user_id, q_id)
+
+    if order:
+        query += " ORDER BY {0}".format(order)
+    if limit:
+        query += " LIMIT {0}".format(limit)
+    if offset:
+        query += " OFFSET {0}".format(offset)
+
+    cursor.execute(query)
     c_list = cursor.fetchall()
     columns = [i[0] for i in cursor.description]
     cursor.close()
