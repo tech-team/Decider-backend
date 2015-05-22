@@ -123,7 +123,7 @@ def registration_view(request):
 
 @require_http_methods(['POST'])
 def refresh_token_view(request):
-    refresh_token = request.GET.get('refresh_token')
+    refresh_token = request.POST.get('refresh_token')
     if not refresh_token:
         return build_error_response(httplib.BAD_REQUEST, CODE_REQUIRED_PARAMS_MISSING,
                                     "Required params are missing", ['refresh_token'])
