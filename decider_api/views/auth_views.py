@@ -41,7 +41,7 @@ def login_view(request):
                                 password=password)
 
         if not user:
-            return build_error_response(httplib.FORBIDDEN, CODE_INVALID_CREDENTIALS, 'Invalid credentials')
+            return build_error_response(httplib.BAD_REQUEST, CODE_INVALID_CREDENTIALS, 'Invalid credentials')
         else:
             data = get_token_data(
                 'password',
@@ -100,7 +100,7 @@ def registration_view(request):
             user = authenticate(social_id=social_id, social_site=social_site,
                                 password=password)
         if not user:
-            return build_error_response(httplib.FORBIDDEN, CODE_INVALID_CREDENTIALS,
+            return build_error_response(httplib.BAD_REQUEST, CODE_INVALID_CREDENTIALS,
                                         "Invalid credentials")
 
         data = get_token_data(
@@ -136,7 +136,7 @@ def refresh_token_view(request):
     )
 
     if not data:
-        return build_error_response(httplib.FORBIDDEN, CODE_INVALID_TOKEN,
+        return build_error_response(httplib.BAD_REQUEST, CODE_INVALID_TOKEN,
                                     "Invalid refresh token")
 
     return build_response(httplib.CREATED, CODE_CREATED, "Here is your fresh token", data)

@@ -43,7 +43,7 @@ class PollEndpoint(ProtectedResourceView):
                 return build_error_response(httplib.NOT_FOUND, CODE_UNKNOWN_POLL,
                                             "Poll with specified id was not found")
             elif res_code == I_CODE_ALREADY_VOTED:
-                return build_error_response(httplib.FORBIDDEN, CODE_ALREADY_VOTED,
+                return build_error_response(httplib.BAD_REQUEST, CODE_ALREADY_VOTED,
                                             "Already voted for that poll")
 
             votes_count = vote_on_poll(user_id, p.id, pi_id)
