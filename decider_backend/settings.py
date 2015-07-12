@@ -209,6 +209,8 @@ try:
 except:
     pass
 
+USE_X_FORWARDED_HOST = True
+
 SOCIAL_AUTH_URL_NAMESPACE = 'api:social'
 
 SOCIAL_AUTH_USER_MODEL = 'decider_app.User'
