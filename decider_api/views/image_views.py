@@ -39,7 +39,7 @@ class ImagesEndpoint(ProtectedResourceView):
         uid = uuid.uuid4().hex
         filename = uid + '.jpg'
         preview_filename = uid + '_preview.jpg'
-        dirname = os.path.join('images', cur_time[:5], cur_time[5:6])
+        dirname = os.path.join('images', 'polls', cur_time[:5], cur_time[5:6])
         url = os.path.join(dirname, filename)
         preview_url = os.path.join(dirname, preview_filename)
 

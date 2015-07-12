@@ -151,6 +151,7 @@ LOGIN_URL = "/login/"
 HOST_SCHEMA = get_config_opt(config, 'host', 'HOST_SCHEMA', 'http')
 HOST_ADDRESS = get_config_opt(config, 'host', 'HOST_ADDRESS', '0.0.0.0')
 HOST_PORT = get_config_opt(config, 'host', 'HOST_PORT', '31700')
+HOST_FULL_ADDRESS = urlparse.urlunparse((HOST_SCHEMA, HOST_ADDRESS + ':' + HOST_PORT, '', '', '', ''))
 
 OAUTH_CLIENT_ID = get_config_opt(config, 'oauth', 'CLIENT_ID')
 OAUTH_CLIENT_SECRET = get_config_opt(config, 'oauth', 'CLIENT_SECRET')
@@ -211,13 +212,14 @@ except:
 SOCIAL_AUTH_URL_NAMESPACE = 'api:social'
 
 SOCIAL_AUTH_USER_MODEL = 'decider_app.User'
+SOCIAL_AUTH_USER_FIELDS = ['uid', ]
 
 SOCIAL_AUTH_VK_OAUTH2_KEY = get_config_opt(config, 'vk', 'VK_APP_KEY')
 SOCIAL_AUTH_VK_OAUTH2_SECRET = get_config_opt(config, 'vk', 'VK_APP_SECRET')
 SOCIAL_AUTH_VK_OAUTH2_SCOPE = []
 
 SOCIAL_AUTH_ADMIN_USER_SEARCH_FIELDS = ['username', 'email']
-SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/'
+SOCIAL_AUTH_LOGIN_REDIRECT_URL = 'api:social_complete'
 
 SOCIAL_AUTH_PIPELINE = (
     # Get the information we can about the user and return it in a simple
@@ -259,6 +261,8 @@ SOCIAL_AUTH_PIPELINE = (
     # Populate the extra_data field in the social record with the values
     # specified by settings (and the default ones like access_token, etc).
     'social.pipeline.social_auth.load_extra_data',
+
+    'decider_api.utils.vk_helper.get_additional_data',
 
     # Update the user record with any changed info from the auth service.
     'social.pipeline.user.user_details'

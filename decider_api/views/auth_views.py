@@ -5,6 +5,7 @@ import urllib2
 import uuid
 from django.contrib.auth import authenticate, logout
 from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
 from django.views.decorators.http import require_http_methods
 from decider_api.utils.endpoint_decorators import require_params
@@ -140,6 +141,30 @@ def refresh_token_view(request):
                                     "Invalid refresh token")
 
     return build_response(httplib.CREATED, CODE_CREATED, "Here is your fresh token", data)
+
+
+def social_login(request):
+    return redirect(reverse('api:social:begin', kwargs={'backend': 'vk-oauth2'}))
+
+
+def social_complete(request):
+    if request.user.is_authenticated():
+        data = get_token_data(
+            'password',
+            {
+                'email': request.user.email,
+                'password': request.user.get_dummy_password()
+            }
+        )
+        if data:
+            data.update({'user': get_user_data(request.user)})
+            return build_response(httplib.OK, CODE_OK, "Login successful", data)
+        else:
+            return build_error_response(httplib.BAD_REQUEST, CODE_INVALID_CREDENTIALS,
+                                        "Invalid credentials")
+    else:
+        return build_error_response(httplib.INTERNAL_SERVER_ERROR, CODE_LOGIN_FAILED,
+                                    "Something went wrong")
 
 
 @login_required(login_url='/login/')

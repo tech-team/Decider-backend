@@ -1,4 +1,5 @@
 # coding=utf-8
+import hashlib
 import uuid
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.db import models
@@ -28,9 +29,28 @@ class MyUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_user(self, username, email=None, password=None, **extra_fields):
-        return self._create_user(username, email, password, False, False,
-                                 **extra_fields)
+    def create_user(self, *args, **kwargs):
+        if 'uid' in kwargs:
+
+            social_site_id = SocialSite.objects.get(name='vk').id
+            social_id = kwargs.get('uid')
+
+            try:
+                user = User.objects.get(social_site_id=social_site_id, social_id=social_id)
+            except User.DoesNotExist:
+                now = timezone.now()
+                user = self.model(uid=get_random_uid(),
+                                  social_id=social_id,
+                                  social_site_id=social_site_id,
+                                  is_active=True,
+                                  last_login=now, date_joined=now)
+                user.email = user.uid
+                user.set_password(user.get_dummy_password())
+                user.save(using=self._db)
+
+            return user
+        else:
+            return self._create_user(*args, **kwargs)
 
     def create_superuser(self, username, email, password, **extra_fields):
         return self._create_user(username, email, password,
@@ -128,6 +148,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         full_name = '%s %s %s' % (self.first_name, self.middle_name, self.last_name)
         return full_name.strip()
 
+    def get_dummy_password(self):
+        return hashlib.md5(self.uid).hexdigest()
 
 class Category(models.Model):
     name = models.CharField(max_length=100, verbose_name=u'Название', null=True, blank=True)
