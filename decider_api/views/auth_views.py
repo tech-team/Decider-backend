@@ -155,25 +155,19 @@ def social_complete(request):
         if 'access_token' in request.GET:
             return render(request, 'social_login.html', {'text': 'Login successful'})
         else:
-            data = get_token_data(
-                'password',
-                {
-                    'email': request.user.email,
-                    'password': request.user.get_dummy_password()
-                }
-            )
+            data = request.session.get('access_token')
             if data:
+                del request.session['access_token']
+
                 response = redirect('api:social_complete')
                 response['Location'] += '?access_token=' + data.get('access_token') + \
                                         '&expires=' + str(data.get('expires')) + \
                                         '&refresh_token=' + data.get('refresh_token')
                 return response
             else:
-                return build_error_response(httplib.BAD_REQUEST, CODE_INVALID_CREDENTIALS,
-                                            "Invalid credentials")
+                return render(request, 'social_login.html', {'text': 'You need to login again'})
     else:
-        return build_error_response(httplib.INTERNAL_SERVER_ERROR, CODE_LOGIN_FAILED,
-                                    "Something went wrong")
+        return render(request, 'social_login.html', {'text': 'Something went wrong'})
 
 
 @login_required(login_url='/login/')

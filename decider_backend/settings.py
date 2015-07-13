@@ -267,5 +267,7 @@ SOCIAL_AUTH_PIPELINE = (
     'decider_api.utils.pipeline.get_additional_data',
 
     # Update the user record with any changed info from the auth service.
-    'social.pipeline.user.user_details'
+    'social.pipeline.user.user_details',
+
+    'decider_api.utils.pipeline.get_access_token'
 )
