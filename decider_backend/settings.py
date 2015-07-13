@@ -271,3 +271,5 @@ SOCIAL_AUTH_PIPELINE = (
 
     'decider_api.utils.pipeline.get_access_token'
 )
+
+GOOGLE_API_KEY = get_config_opt(config, 'google_api', 'API_KEY')
