@@ -3,6 +3,9 @@ BACKENDS = {
     'vk': 'vk-oauth2'
 }
 
+def str2bool(v):
+    return v.lower() in ("yes", "true", "t", "1")
+
 def get_short_user_data(user):
     return {
         'uid': user.uid,

@@ -1,16 +1,22 @@
 import httplib
 import json
+from PIL import Image
+import os
+import uuid
 from django.db import transaction
+from django.utils import timezone
 from oauth2_provider.views import ProtectedResourceView
 from decider_api.db.comments import get_comments
 from decider_api.db.poll_items import get_poll_items
 from decider_api.db.questions import tab_switch, get_question
 from decider_api.log_manager import logger
 from decider_api.utils.endpoint_decorators import require_post_data, require_params
-from decider_api.utils.helper import get_short_user_data, get_short_user_row_data
+from decider_api.utils.helper import get_short_user_data, get_short_user_row_data, str2bool
+from decider_api.views.image_views import IMAGE_SIZE, PREVIEW_SIZE
 from decider_app.models import Question, Category, User, Poll, PollItem, Picture
 from decider_app.views.utils.response_builder import build_response, build_error_response
 from decider_app.views.utils.response_codes import *
+from decider_backend.settings import MEDIA_ROOT
 
 
 class QuestionsEndpoint(ProtectedResourceView):
@@ -114,16 +120,36 @@ class QuestionsEndpoint(ProtectedResourceView):
                                         CODE_SERVER_ERROR, "Failed to fetch questions")
 
     @transaction.atomic
-    @require_post_data(['text', 'poll', 'category_id'])
+    @require_params(['text', 'category_id'])
     def post(self, request, *args, **kwargs):
         try:
-            data = json.loads(request.POST.get("data"))
-            text = data.get("text")
-            poll = data.get("poll")
-            is_anonymous = True if data.get("is_anonymous") is True else False
+            text = request.POST.get("text")
 
             try:
-                category_id = int(data.get("category_id"))
+                items_count = int(request.POST.get("items_count", 2))
+            except (ValueError, TypeError):
+                return build_error_response(httplib.BAD_REQUEST, CODE_INVALID_DATA,
+                                            "Some fields are invalid", ["items_count"])
+
+            errors = []
+            for i in range(1, items_count+1):
+                poll_num = "poll_" + str(i)
+
+                if not request.POST.get(poll_num + "_text"):
+                    errors.append(poll_num + "_text")
+                for field_name in "image", "preview":
+                    field = poll_num + "_" + field_name
+                    if not request.FILES.get(field):
+                        errors.append(field)
+
+            if errors:
+                return build_error_response(httplib.BAD_REQUEST, CODE_REQUIRED_PARAMS_MISSING,
+                                            "Required params are missing", errors)
+
+            is_anonymous = str2bool(request.POST.get("is_anonymous"))
+
+            try:
+                category_id = int(request.POST.get("category_id"))
                 if not category_id:
                     raise ValueError
             except (ValueError, TypeError):
@@ -137,25 +163,58 @@ class QuestionsEndpoint(ProtectedResourceView):
 
             question = Question.objects.create(text=text, category=category, is_anonymous=is_anonymous,
                                                author=request.resource_owner)
-            question_poll = Poll.objects.create(question=question, items_count=len(poll))
+            question_poll = Poll.objects.create(question=question, items_count=items_count)
 
             data_poll = []
-            for poll_item in poll:
-                text = poll_item.get('text')
+            for i in range(1, items_count+1):
+                poll_num = "poll_" + str(i)
+
+                text = request.POST.get(poll_num + '_text')
+                image = request.FILES.get(poll_num + '_image')
+                preview = request.FILES.get(poll_num + '_preview')
+
+                cur_time = timezone.now().strftime('%s')
+                uid = uuid.uuid4().hex
+                filename = uid + '.jpg'
+                preview_filename = uid + '_preview.jpg'
+                dirname = os.path.join('images', 'polls', cur_time[:5], cur_time[5:6])
+                url = os.path.join(dirname, filename)
+                preview_url = os.path.join(dirname, preview_filename)
+
+                if not os.path.exists(os.path.join(MEDIA_ROOT, dirname)):
+                    os.makedirs(os.path.join(MEDIA_ROOT, dirname))
+
+                invalid_fields = []
                 try:
-                    picture = Picture.objects.get(uid=poll_item.get('image_uid'))
-                except Picture.DoesNotExist:
-                    picture = None
+                    img = Image.open(image)
+                    resize_scale = max(float(img.size[0])/IMAGE_SIZE[0], float(img.size[1])/IMAGE_SIZE[1])
+                    if resize_scale > 1:
+                        img = img.resize((int(img.size[0]/resize_scale), int(img.size[1]/resize_scale)))
+                    img.save(os.path.join(MEDIA_ROOT, url), 'JPEG', quality=95)
                 except Exception as e:
                     logger.exception(e)
-                    picture = None
+                    invalid_fields.append(poll_num + '_image')
 
-                if not text:
+                try:
+                    preview = Image.open(preview)
+                    resize_scale = max(float(preview.size[0])/PREVIEW_SIZE[0], float(preview.size[1])/PREVIEW_SIZE[1])
+                    if resize_scale > 1:
+                        preview = preview.resize((int(preview.size[0]/resize_scale), int(preview.size[1]/resize_scale)))
+                    preview.save(os.path.join(MEDIA_ROOT, preview_url), 'JPEG', quality=95)
+                except Exception as e:
+                    logger.exception(e)
+                    invalid_fields.append(poll_num + '_preview')
+
+                if invalid_fields:
                     return build_error_response(httplib.BAD_REQUEST, CODE_INVALID_DATA,
-                                                "Some fields are invalid", ["poll_item.text"])
+                                                "Some fields are invalid", invalid_fields)
+
+                picture = Picture.objects.create(url=os.path.join('media', url), uid=uid,
+                                                 preview_url=os.path.join('media', preview_url))
 
                 pi = PollItem.objects.create(poll=question_poll, question=question,
-                                             text=poll_item['text'], picture=picture)  # TODO: picture
+                                             text=text, picture=picture)
+
                 data_poll.append({
                     'id': pi.id,
                     'text': pi.text,
