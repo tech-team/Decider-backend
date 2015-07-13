@@ -12,11 +12,12 @@ urlpatterns = patterns('',
     url(r'^social/', include('social.apps.django_app.urls', namespace='social')),
 
     url(r'^login/?$', auth_views.login_view, name="login"),
-    url(r'^social_login/?$', auth_views.social_login, name="social_login"),
+    url(r'^social_login/(?P<provider>\w+)/?$', auth_views.social_login, name="social_login"),
     url(r'^social_complete/?$', auth_views.social_complete, name="social_complete"),
     url(r'^registration/?$', auth_views.registration_view, name="registration"),
     url(r'^refresh_token/?$', auth_views.refresh_token_view, name="refresh_token"),
 
+    url(r'^user/?$', UserDataEndpoint.as_view(), name="current_user"),
     url(r'^user/(?P<user_id>[0-9]+)/?$', UserDataEndpoint.as_view(), name="user"),
     url(r'^edit/?$', UserEditEndpoint.as_view(), name="edit"),
 

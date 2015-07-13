@@ -1,4 +1,7 @@
 
+BACKENDS = {
+    'vk': 'vk-oauth2'
+}
 
 def get_short_user_data(user):
     return {

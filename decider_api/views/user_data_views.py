@@ -13,7 +13,11 @@ class UserDataEndpoint(ProtectedResourceView):
     def get(self, request, *args, **kwargs):
         try:
             try:
-                user_id = int(kwargs.get('user_id'))
+                if not kwargs.get('user_id'):
+                    user_id = request.resource_owner.id
+                else:
+                    user_id = int(kwargs.get('user_id'))
+
                 if not user_id:
                     raise ValueError('Error: user_id is ' + str(user_id))
             except Exception as e:

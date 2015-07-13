@@ -6,10 +6,10 @@ import uuid
 from django.contrib.auth import authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 from decider_api.utils.endpoint_decorators import require_params
-from decider_api.utils.helper import get_user_data
+from decider_api.utils.helper import get_user_data, BACKENDS
 
 from decider_app.models import User, SocialSite
 from decider_app.views.utils.auth_helper import get_token_data
@@ -143,25 +143,34 @@ def refresh_token_view(request):
     return build_response(httplib.CREATED, CODE_CREATED, "Here is your fresh token", data)
 
 
-def social_login(request):
-    return redirect(reverse('api:social:begin', kwargs={'backend': 'vk-oauth2'}))
-
+def social_login(request, provider):
+    if provider in BACKENDS:
+        request.session['oauth_backend'] = BACKENDS[provider]
+        return redirect(reverse('api:social:begin', kwargs={'backend': BACKENDS[provider]}))
+    else:
+        return render(request, 'social_login.html', {'text': 'Backend not supported'})
 
 def social_complete(request):
     if request.user.is_authenticated():
-        data = get_token_data(
-            'password',
-            {
-                'email': request.user.email,
-                'password': request.user.get_dummy_password()
-            }
-        )
-        if data:
-            data.update({'user': get_user_data(request.user)})
-            return build_response(httplib.OK, CODE_OK, "Login successful", data)
+        if 'access_token' in request.GET:
+            return render(request, 'social_login.html', {'text': 'Login successful'})
         else:
-            return build_error_response(httplib.BAD_REQUEST, CODE_INVALID_CREDENTIALS,
-                                        "Invalid credentials")
+            data = get_token_data(
+                'password',
+                {
+                    'email': request.user.email,
+                    'password': request.user.get_dummy_password()
+                }
+            )
+            if data:
+                response = redirect('api:social_complete')
+                response['Location'] += '?access_token=' + data.get('access_token') + \
+                                        '&expires=' + str(data.get('expires')) + \
+                                        '&refresh_token=' + data.get('refresh_token')
+                return response
+            else:
+                return build_error_response(httplib.BAD_REQUEST, CODE_INVALID_CREDENTIALS,
+                                            "Invalid credentials")
     else:
         return build_error_response(httplib.INTERNAL_SERVER_ERROR, CODE_LOGIN_FAILED,
                                     "Something went wrong")

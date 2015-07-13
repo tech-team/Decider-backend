@@ -264,7 +264,7 @@ SOCIAL_AUTH_PIPELINE = (
     # specified by settings (and the default ones like access_token, etc).
     'social.pipeline.social_auth.load_extra_data',
 
-    'decider_api.utils.vk_helper.get_additional_data',
+    'decider_api.utils.pipeline.get_additional_data',
 
     # Update the user record with any changed info from the auth service.
     'social.pipeline.user.user_details'
