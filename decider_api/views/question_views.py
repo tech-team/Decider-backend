@@ -294,7 +294,8 @@ class QuestionDetailsEndpoint(ProtectedResourceView):
                         'creation_date': comment_row[c_columns.index('creation_date')],
                         'likes_count': comment_row[c_columns.index('likes_count')],
                         'author': get_short_user_row_data(question_row, q_columns, 'author'),
-                        'voted': True if comment_row[c_columns.index('voted')] else False
+                        'voted': True if comment_row[c_columns.index('voted')] else False,
+                        'is_anonymous': comment_row[c_columns.index('is_anonymous')]
                     })
                 question['comments'] = comments
             else:

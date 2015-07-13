@@ -5,7 +5,8 @@ from oauth2_provider.views import ProtectedResourceView
 from decider_api.db.comments import get_comments
 from decider_api.log_manager import logger
 from decider_api.utils.endpoint_decorators import require_post_data, require_params
-from decider_api.utils.helper import get_short_user_data, RepresentsInt, check_params_types, get_short_user_row_data
+from decider_api.utils.helper import get_short_user_data, RepresentsInt, check_params_types, get_short_user_row_data, \
+    str2bool
 from decider_app.models import Question, Comment
 from decider_app.views.utils.response_builder import build_error_response, build_response
 from decider_app.views.utils.response_codes import CODE_INVALID_DATA, CODE_UNKNOWN_QUESTION, CODE_CREATED, \
@@ -50,7 +51,8 @@ class CommentsEndpoint(ProtectedResourceView):
                 'creation_date': comment_row[c_columns.index('creation_date')],
                 'likes_count': comment_row[c_columns.index('likes_count')],
                 'author': get_short_user_row_data(comment_row, c_columns, 'author'),
-                'voted': True if comment_row[c_columns.index('voted')] else False
+                'voted': True if comment_row[c_columns.index('voted')] else False,
+                'is_anonymous': comment_row[c_columns.index('is_anonymous')]
             })
 
         return build_response(httplib.OK, CODE_OK, "Successfully fetched comments", data=comments)
@@ -61,7 +63,7 @@ class CommentsEndpoint(ProtectedResourceView):
         try:
             data = json.loads(request.POST.get('data'))
             text = str(data.get('text')).strip(" ")
-            is_anonymous = True if data.get("is_anonymous") is True else False
+            is_anonymous = str2bool(data.get("is_anonymous"))
             question_id = 0
 
             errors = []
