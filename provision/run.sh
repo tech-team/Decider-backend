@@ -1,5 +1,10 @@
 #!/bin/bash
 
+export RABBITMQ_USER=decider_user
+export RABBITMQ_PASS=decider_pass
+export RABBITMQ_VHOST=decider_vhost
+
+
 # Edit the following to change the name of the database user that will be created:
 APP_DB_USER=decider_db_user
 APP_DB_PASS=decider_db_pass
@@ -139,3 +144,20 @@ echo ". /home/vagrant/decider-backend/env/bin/activate" >> ${HOME}/.bashrc
 #fi
 
 sudo /etc/init.d/postgresql restart
+
+
+# celery stuff
+
+sudo apt-get -f install
+
+sudo rabbitmqctl add_user $RABBITMQ_USER $RABBITMQ_PASS
+sudo rabbitmqctl add_vhost $RABBITMQ_VHOST
+sudo rabbitmqctl set_permissions -p $RABBITMQ_VHOST $RABBITMQ_USER ".*" ".*" ".*"
+
+source ${HOME}/decider-backend/env/bin/activate
+
+export CELERY_APP=push_service
+export CELERY_MODULE=tasks
+
+# tbd
+celery -D -B -A $CELERY_APP.$CELERY_MODULE worker
