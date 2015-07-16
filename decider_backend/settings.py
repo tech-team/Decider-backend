@@ -224,6 +224,8 @@ SOCIAL_AUTH_VK_OAUTH2_SCOPE = []
 SOCIAL_AUTH_ADMIN_USER_SEARCH_FIELDS = ['username', 'email']
 SOCIAL_AUTH_LOGIN_REDIRECT_URL = 'api:social_complete'
 
+SOCIAL_AUTH_PROTECTED_USER_FIELDS = ['email', 'username', 'first_name', 'last_name']
+
 SOCIAL_AUTH_PIPELINE = (
 
     # 'decider_api.utils.pipeline.logout_internal',

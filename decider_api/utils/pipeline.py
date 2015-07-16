@@ -10,7 +10,7 @@ def logout_internal(backend, details, response, *args, **kwargs):
 
 
 def get_additional_data(strategy, details, user=None, *args, **kwargs):
-    if user:
+    if user and kwargs.get('is_new'):
 
         backend = strategy.session.get('oauth_backend')
         if backend:
