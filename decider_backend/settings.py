@@ -76,7 +76,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware'
+    'corsheaders.middleware.CorsMiddleware',
+    'decider_backend.middleware.SocialAuthMiddleware'
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
@@ -224,6 +225,9 @@ SOCIAL_AUTH_ADMIN_USER_SEARCH_FIELDS = ['username', 'email']
 SOCIAL_AUTH_LOGIN_REDIRECT_URL = 'api:social_complete'
 
 SOCIAL_AUTH_PIPELINE = (
+
+    # 'decider_api.utils.pipeline.logout_internal',
+
     # Get the information we can about the user and return it in a simple
     # format to create the user instance later. On some cases the details are
     # already part of the auth response from the provider, but sometimes this

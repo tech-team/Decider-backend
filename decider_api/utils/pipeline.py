@@ -1,6 +1,12 @@
+from django.contrib.auth import logout
 from decider_api.utils import vk_helper
 from decider_api.utils.helper import BACKENDS
 from decider_app.views.utils.auth_helper import get_token_data
+
+
+def logout_internal(backend, details, response, *args, **kwargs):
+    logout(backend.strategy.request)
+    return
 
 
 def get_additional_data(strategy, details, user=None, *args, **kwargs):

@@ -12,7 +12,7 @@ from decider_api.db.questions import tab_switch, get_question
 from decider_api.log_manager import logger
 from decider_api.utils.endpoint_decorators import require_post_data, require_params
 from decider_api.utils.helper import get_short_user_data, get_short_user_row_data, str2bool
-from decider_api.views.image_views import IMAGE_SIZE, PREVIEW_SIZE
+from decider_api.utils.image_helper import IMAGE_SIZE, PREVIEW_SIZE
 from decider_app.models import Question, Category, User, Poll, PollItem, Picture
 from decider_app.views.utils.response_builder import build_response, build_error_response
 from decider_app.views.utils.response_codes import *
