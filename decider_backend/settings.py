@@ -66,6 +66,8 @@ INSTALLED_APPS = (
     'oauth2_provider',
     'corsheaders',
     'social.apps.django_app.default',
+    'djcelery',
+    'push_service'
 )
 
 MIDDLEWARE_CLASSES = (

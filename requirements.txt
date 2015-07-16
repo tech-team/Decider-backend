@@ -11,3 +11,4 @@ python-social-auth
 gunicorn==19.3.0
 Pillow
 celery
+django-celery
