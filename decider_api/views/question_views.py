@@ -219,7 +219,8 @@ class QuestionsEndpoint(ProtectedResourceView):
                     'id': pi.id,
                     'text': pi.text,
                     'image_url': pi.picture.url if pi.picture else None,
-                    'preview_url': pi.picture.preview_url if pi.picture else None
+                    'preview_url': pi.picture.preview_url if pi.picture else None,
+                    'votes_count': pi.votes_count
                 })
 
             data = {
@@ -229,7 +230,8 @@ class QuestionsEndpoint(ProtectedResourceView):
                 "category_id": category.id,
                 "author": get_short_user_data(request.resource_owner),
                 "poll": data_poll,
-                "is_anonymous": question.is_anonymous
+                "is_anonymous": question.is_anonymous,
+                "likes_count": question.likes_count
             }
 
             return build_response(httplib.CREATED, CODE_CREATED, "Question added", data)

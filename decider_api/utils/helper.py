@@ -4,7 +4,12 @@ BACKENDS = {
 }
 
 def str2bool(v):
-    return v.lower() in ("yes", "true", "t", "1")
+    if not v:
+        return False
+    elif v is True:
+        return True
+    else:
+        return v.lower() in ("yes", "true", "t", "1")
 
 def get_short_user_data(user):
     return {
