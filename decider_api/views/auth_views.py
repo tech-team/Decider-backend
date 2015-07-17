@@ -145,6 +145,7 @@ def refresh_token_view(request):
 
 def social_login(request, provider):
     if provider in BACKENDS:
+        logout(request)
         request.session['oauth_backend'] = BACKENDS[provider]
         return redirect(reverse('api:social:begin', kwargs={'backend': BACKENDS[provider]}))
     else:

@@ -6,6 +6,7 @@ from decider_app.views.utils.auth_helper import get_token_data
 
 def logout_internal(backend, details, response, *args, **kwargs):
     logout(backend.strategy.request)
+    logout(kwargs.get('strategy').request)
     return
 
 

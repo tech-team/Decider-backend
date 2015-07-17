@@ -23,7 +23,7 @@
 			      
 			      <ul class="nav navbar-nav navbar-right">
                     <li><a href="#">{{ user.username }}</a></li>
-			        {% if user.is_authenticated %}<li><a href="/logout/">Выйти</a></li>{% endif %}
+			        {% if user.is_authenticated %}<li><a href="{% url "api:logout" %}">Выйти</a></li>{% endif %}
 			      </ul>
 			    </div>
 			  </div>
