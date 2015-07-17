@@ -163,7 +163,8 @@ def social_complete(request):
                 response = redirect('api:social_complete')
                 response['Location'] += '?access_token=' + data.get('access_token') + \
                                         '&expires=' + str(data.get('expires')) + \
-                                        '&refresh_token=' + data.get('refresh_token')
+                                        '&refresh_token=' + data.get('refresh_token') + \
+                                        '&username=' + request.user.username
                 return response
             else:
                 return render(request, 'social_login.html', {'text': 'You need to login again'})
