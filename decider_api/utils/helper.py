@@ -34,17 +34,8 @@ def get_short_user_row_data(row, columns, prefix):
 
 
 def get_user_data(user):
-    if user.social_id and user.social_site:
-        data = {
-            'social_id': user.social_id,
-            'social_site': user.social_site.name
-        }
-    else:
-        data = {
-            'email': user.email
-        }
-
-    data.update({
+    return {
+        'email': user.email,
         'uid': user.uid,
         'username': user.username,
         'first_name': user.first_name,
@@ -60,9 +51,7 @@ def get_user_data(user):
         'gender': user.gender,
         'about': user.about,
         'avatar': user.avatar.url if user.avatar else None
-    })
-
-    return data
+    }
 
 
 def RepresentsInt(s):
