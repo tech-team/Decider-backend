@@ -63,7 +63,7 @@ class CommentsEndpoint(ProtectedResourceView):
     def post(self, request, *args, **kwargs):
         try:
             data = json.loads(request.POST.get('data'))
-            text = str(data.get('text')).strip(" ")
+            text = unicode(data.get('text')).strip(" ")
             is_anonymous = str2bool(data.get("is_anonymous"))
             question_id = 0
 
