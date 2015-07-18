@@ -5,7 +5,7 @@ from decider_api.views.comment_views import CommentsEndpoint
 from decider_api.views.image_views import ImagesEndpoint
 from decider_api.views.poll_views import PollEndpoint
 from decider_api.views.question_views import QuestionsEndpoint, QuestionDetailsEndpoint
-from decider_api.views.user_data_views import UserDataEndpoint, UserEditEndpoint
+from decider_api.views.user_data_views import UserDataEndpoint
 from decider_api.views.vote_views import VoteEndpoint
 
 urlpatterns = patterns('',
@@ -20,7 +20,6 @@ urlpatterns = patterns('',
 
     url(r'^user/?$', UserDataEndpoint.as_view(), name="current_user"),
     url(r'^user/(?P<user_id>[0-9]+)/?$', UserDataEndpoint.as_view(), name="user"),
-    url(r'^edit/?$', UserEditEndpoint.as_view(), name="edit"),
 
     url(r'^questions/?$', QuestionsEndpoint.as_view(), name="questions"),
     url(r'^questions/(?P<question_id>[0-9]+)/?$', QuestionDetailsEndpoint.as_view(), name="question"),

@@ -36,6 +36,9 @@ def get_additional_data(strategy, details, user=None, *args, **kwargs):
 
 def get_access_token(strategy, details, user=None, *args, **kwargs):
     if user:
+        if kwargs.get('is_new'):
+            user.username = ''
+            user.save()
         data = get_token_data(
             'password',
             {

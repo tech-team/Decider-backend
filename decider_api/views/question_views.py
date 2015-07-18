@@ -10,7 +10,7 @@ from decider_api.db.comments import get_comments
 from decider_api.db.poll_items import get_poll_items
 from decider_api.db.questions import tab_switch, get_question
 from decider_api.log_manager import logger
-from decider_api.utils.endpoint_decorators import require_post_data, require_params
+from decider_api.utils.endpoint_decorators import require_post_data, require_params, require_registration
 from decider_api.utils.helper import get_short_user_data, get_short_user_row_data, str2bool
 from decider_api.utils.image_helper import IMAGE_SIZE, PREVIEW_SIZE
 from decider_app.models import Question, Category, User, Poll, PollItem, Picture
@@ -20,6 +20,7 @@ from decider_backend.settings import MEDIA_ROOT
 
 
 class QuestionsEndpoint(ProtectedResourceView):
+    @require_registration
     def get(self, request, *args, **kwargs):
         try:
             tab = request.GET.get('tab')
@@ -121,6 +122,7 @@ class QuestionsEndpoint(ProtectedResourceView):
 
     @transaction.atomic
     @require_params(['text', 'category_id'])
+    @require_registration
     def post(self, request, *args, **kwargs):
         try:
             text = request.POST.get("text")
@@ -242,6 +244,7 @@ class QuestionsEndpoint(ProtectedResourceView):
 
 
 class QuestionDetailsEndpoint(ProtectedResourceView):
+    @require_registration
     def get(self, request, *args, **kwargs):
         try:
 
