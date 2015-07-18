@@ -164,7 +164,7 @@ def social_complete(request):
                 response['Location'] += '?access_token=' + data.get('access_token') + \
                                         '&expires=' + str(data.get('expires')) + \
                                         '&refresh_token=' + data.get('refresh_token') + \
-                                        '&username=' + request.user.username
+                                        '&user_id=' + request.user.social_id
                 return response
             else:
                 return render(request, 'social_login.html', {'text': 'You need to login again'})

@@ -52,7 +52,8 @@ class CommentsEndpoint(ProtectedResourceView):
                 'likes_count': comment_row[c_columns.index('likes_count')],
                 'author': get_short_user_row_data(comment_row, c_columns, 'author'),
                 'voted': True if comment_row[c_columns.index('voted')] else False,
-                'is_anonymous': comment_row[c_columns.index('is_anonymous')]
+                'is_anonymous': comment_row[c_columns.index('is_anonymous')],
+                'question_id': comment_row[c_columns.index('question_id')]
             })
 
         return build_response(httplib.OK, CODE_OK, "Successfully fetched comments", data=comments)
