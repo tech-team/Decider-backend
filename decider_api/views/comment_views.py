@@ -16,13 +16,14 @@ from decider_app.views.utils.response_codes import CODE_INVALID_DATA, CODE_UNKNO
 class CommentsEndpoint(ProtectedResourceView):
 
     ALLOWED_ORDER_FIELDS = ['creation_date', '-creation_date']
+    DEFAULT_LIMIT = 30
 
     @require_params(['question_id'])
     @track_activity
     def get(self, request, *args, **kwargs):
         params = {
             'question_id': request.GET.get('question_id'),
-            'limit': request.GET.get('limit'),
+            'limit': request.GET.get('limit') if request.GET.get('limit') else self.DEFAULT_LIMIT,
             'offset': request.GET.get('offset')
         }
 
@@ -57,7 +58,15 @@ class CommentsEndpoint(ProtectedResourceView):
                 'question_id': comment_row[c_columns.index('question_id')]
             })
 
-        return build_response(httplib.OK, CODE_OK, "Successfully fetched comments", data=comments)
+        remaining = Question.objects.get(id=int(params['question_id'])).comments_count \
+                    - (int(params['offset']) if params.get('offset') else 0) \
+                    - (int(params['limit']) if params.get('limit') else 0)
+        data = {
+            'remaining': remaining if remaining >= 0 else 0,
+            'comments': comments
+        }
+
+        return build_response(httplib.OK, CODE_OK, "Successfully fetched comments", data=data)
 
     @transaction.atomic
     @require_post_data(['text', 'question_id'])
