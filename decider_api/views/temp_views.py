@@ -154,6 +154,7 @@ def delete_entity(request):
 
 
 def send_push(request):
+    recipient = request.POST.get('reg_token')
     notification = {
         'title': 'Hi dude',
         'body': 'see?'
@@ -161,4 +162,4 @@ def send_push(request):
     data = {
         'data': 'data'
     }
-    gcm_helper.send_push('123', notification, data, dry_run=True)
+    gcm_helper.send_push(recipient, notification, data, dry_run=True)
