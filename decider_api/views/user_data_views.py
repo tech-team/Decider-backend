@@ -1,5 +1,9 @@
 import httplib
+import dateutil.parser
+from django.core.exceptions import ObjectDoesNotExist
+from django.db.models.loading import get_model
 from oauth2_provider.views import ProtectedResourceView
+import time
 from decider_api.log_manager import logger
 from decider_api.utils import helper
 from decider_api.utils.endpoint_decorators import require_registration
@@ -11,9 +15,6 @@ from decider_app.views.utils.response_codes import CODE_UNKNOWN_USER, CODE_INVAL
 
 
 class UserDataEndpoint(ProtectedResourceView):
-    EDITABLE_FIELDS = ['username', 'first_name', 'last_name', 'middle_name',
-                       'is_anonymous', 'gender', 'birthday',
-                       'about', 'country', 'city', 'avatar']
 
     def get(self, request, *args, **kwargs):
         try:
@@ -60,6 +61,42 @@ class UserDataEndpoint(ProtectedResourceView):
                                             "Username taken")
             else:
                 user.username = username
+
+        for field in ['first_name', 'last_name', 'city', 'about']:
+            value = request.POST.get(field)
+            if value is not None:
+                try:
+                    setattr(user, field, value)
+                except Exception as e:
+                    logger.exception(e)
+                    continue
+
+        country = request.POST.get('country')
+        if country is not None:
+            try:
+                db_country = get_model('decider_app', 'country').objects.get(name=country)
+                user.country = db_country
+            except ObjectDoesNotExist:
+                user.country = None
+                pass
+
+        birthday = request.POST.get('birthday')
+        if birthday is not None:
+            try:
+                db_bday = dateutil.parser.parse(birthday).date()
+                user.birthday = db_bday
+            except (ValueError, TypeError):
+                user.birthday = None
+                pass
+
+        gender = request.POST.get('gender')
+        if gender is not None:
+            if gender == 'M':
+                user.gender = True
+            elif gender == 'F':
+                user.gender = False
+            else:
+                user.gender = None
 
         user.save()
 

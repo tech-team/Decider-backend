@@ -134,7 +134,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     country = models.ForeignKey(Country, on_delete=models.SET_NULL, blank=True, null=True)
     city = models.CharField(_(u'Город'), max_length=50, blank=True)
     about = models.TextField(_(u'О себе'), max_length=1000, blank=True)
-    gender = models.BooleanField(_(u'Пол'), blank=True, default=False)
+    gender = models.NullBooleanField(_(u'Пол'), blank=True, null=True, default=False)
 
     avatar = models.OneToOneField(Picture, blank=True, null=True)
 
