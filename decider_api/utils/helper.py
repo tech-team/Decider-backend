@@ -1,3 +1,5 @@
+from time import strftime
+import datetime
 
 BACKENDS = {
     'vk': 'vk-oauth2'
@@ -47,7 +49,8 @@ def get_user_data(user):
         'last_login': user.last_login,
         'country': user.country.name if user.country else None,
         'city': user.city,
-        'birthday': user.birthday,
+        'birthday': user.birthday.strftime("%Y-%m-%d") if user.birthday and
+                                                          user.birthday >= datetime.date(1900, 1, 1) else None,
         'gender': user.gender,
         'about': user.about,
         'avatar': user.avatar.url if user.avatar else None

@@ -11,6 +11,7 @@ urlpatterns = patterns('',
     url(r'^', include('decider_app.urls', namespace="decider_app")),
     url(r'^api/v1/', include('decider_api.urls', namespace="api")),
     url(r'^api/v1/o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
+    url(r'^push/', include('push_service.urls', namespace='push'))
 )
 
 

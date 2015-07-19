@@ -13,7 +13,8 @@ class GcmClient(models.Model):
 
     instance_id = models.CharField(max_length=255)
     registration_token = models.CharField(max_length=255, null=True, blank=True)
-    user = models.ForeignKey(User, null=True, blank=True)
+    subscribed = models.BooleanField(default=True)
+    user = models.ForeignKey(User, null=True, blank=True, db_index=True)
 
     def __unicode__(self):
         return self.instance_id
