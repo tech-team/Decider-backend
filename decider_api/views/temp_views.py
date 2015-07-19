@@ -155,9 +155,12 @@ def delete_entity(request):
 
 def send_push(request):
     recipient = request.POST.get('reg_token')
+    title = request.POST.get('title')
+    msg = request.POST.get('msg')
+
     notification = {
-        'title': 'Hi dude',
-        'body': 'see?'
+        'title': title,
+        'body': msg
     }
     data = {
         'data': 'data'
