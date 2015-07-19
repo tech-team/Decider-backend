@@ -6,6 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from decider_api.utils import gcm_helper
 from decider_api.utils.endpoint_decorators import require_params
+from decider_api.utils.helper import str2bool
 from decider_app.models import *
 from decider_app.views.utils.response_builder import build_response, build_error_response
 from decider_app.views.utils.response_codes import CODE_OK, CODE_UNKNOWN_QUESTION, CODE_SERVER_ERROR, CODE_INVALID_DATA, \
@@ -157,6 +158,7 @@ def send_push(request):
     recipient = request.POST.get('reg_token')
     title = request.POST.get('title')
     msg = request.POST.get('msg')
+    dry_run = str2bool(request.POST.get('dry_run'))
 
     notification = {
         'title': title,
@@ -165,4 +167,4 @@ def send_push(request):
     data = {
         'data': 'data'
     }
-    return gcm_helper.send_push(recipient, notification, data, dry_run=True)
+    return gcm_helper.send_push(recipient, notification, data, dry_run=dry_run)
