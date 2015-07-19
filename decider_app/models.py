@@ -291,3 +291,4 @@ class LocaleCategory(models.Model):
 
     def __unicode__(self):
         return "Locale " + self.locale.name + " for category " + str(self.category.id)
+

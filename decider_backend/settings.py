@@ -66,6 +66,8 @@ INSTALLED_APPS = (
     'oauth2_provider',
     'corsheaders',
     'social.apps.django_app.default',
+    'djcelery',
+    'push_service'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -277,3 +279,14 @@ SOCIAL_AUTH_PIPELINE = (
 
     'decider_api.utils.pipeline.get_access_token'
 )
+
+GOOGLE_API_KEY = get_config_opt(config, 'google_api', 'API_KEY')
+
+
+# celery
+
+RABBITMQ_USER = get_config_opt(config, 'celery', 'RABBITMQ_USER')
+RABBITMQ_PASS = get_config_opt(config, 'celery', 'RABBITMQ_PASS')
+RABBITMQ_HOST = get_config_opt(config, 'celery', 'RABBITMQ_HOST')
+RABBITMQ_PORT = get_config_opt(config, 'celery', 'RABBITMQ_PORT')
+RABBITMQ_VHOST = get_config_opt(config, 'celery', 'RABBITMQ_VHOST')

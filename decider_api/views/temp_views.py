@@ -4,6 +4,7 @@ from django.db import transaction
 from django.db.models.loading import get_model
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
+from decider_api.utils import gcm_helper
 from decider_api.utils.endpoint_decorators import require_params
 from decider_app.models import *
 from decider_app.views.utils.response_builder import build_response, build_error_response
@@ -150,3 +151,15 @@ def delete_entity(request):
                                     CODE_SERVER_ERROR, "Problems")
 
     return build_response(httplib.OK, CODE_OK, "Successfully deleted entity")
+
+
+def send_push(request):
+    recipient = request.POST.get('reg_token')
+    notification = {
+        'title': 'Hi dude',
+        'body': 'see?'
+    }
+    data = {
+        'data': 'data'
+    }
+    gcm_helper.send_push(recipient, notification, data, dry_run=True)
