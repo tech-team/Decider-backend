@@ -35,7 +35,7 @@ class ImagesEndpoint(ProtectedResourceView):
             return build_error_response(httplib.BAD_REQUEST, CODE_REQUIRED_PARAMS_MISSING,
                                         "Required params are missing", errors)
 
-        result = upload_image(image, preview, 'polls')
+        result = upload_image(image, preview)
         error = result.get('error')
         if error:
             return build_error_response(*error)
