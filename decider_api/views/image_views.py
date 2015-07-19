@@ -7,7 +7,7 @@ from django.db import transaction
 from django.utils import timezone
 from oauth2_provider.views import ProtectedResourceView
 from decider_api.log_manager import logger
-from decider_api.utils.endpoint_decorators import require_params
+from decider_api.utils.endpoint_decorators import require_params, track_activity
 from decider_api.utils.image_helper import upload_image
 from decider_app.models import Picture
 from decider_app.views.utils.response_builder import build_error_response, build_response
@@ -19,6 +19,7 @@ from decider_backend.settings import MEDIA_ROOT
 class ImagesEndpoint(ProtectedResourceView):
 
     @transaction.atomic
+    @track_activity
     def post(self, request, *args, **kwargs):
 
         image = request.FILES.get('image')

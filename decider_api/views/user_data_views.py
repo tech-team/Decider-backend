@@ -2,6 +2,7 @@ import httplib
 from oauth2_provider.views import ProtectedResourceView
 from decider_api.log_manager import logger
 from decider_api.utils import helper
+from decider_api.utils.endpoint_decorators import track_activity
 from decider_api.utils.helper import get_user_data
 from decider_app.models import User
 from decider_app.views.utils.response_builder import build_error_response, build_response
@@ -10,6 +11,7 @@ from decider_app.views.utils.response_codes import CODE_UNKNOWN_USER, CODE_INVAL
 
 
 class UserDataEndpoint(ProtectedResourceView):
+    @track_activity
     def get(self, request, *args, **kwargs):
         try:
             try:
@@ -44,6 +46,7 @@ class UserEditEndpoint(ProtectedResourceView):
                        'is_anonymous', 'gender', 'birthday',
                        'about', 'country', 'city', 'avatar']
 
+    @track_activity
     def post(self, request, *args, **kwargs):
         user = request.resource_owner
 

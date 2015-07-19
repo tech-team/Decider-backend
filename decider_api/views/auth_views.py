@@ -40,6 +40,7 @@ def login_view(request):
 
             user = authenticate(social_id=social_id, social_site=social_site,
                                 password=password)
+            user.update_last_active()
 
         if not user:
             return build_error_response(httplib.BAD_REQUEST, CODE_INVALID_CREDENTIALS, 'Invalid credentials')
@@ -153,6 +154,7 @@ def social_login(request, provider):
 
 def social_complete(request):
     if request.user.is_authenticated():
+        request.user.update_last_active()
         if 'access_token' in request.GET:
             return render(request, 'social_login.html', {'text': 'Login successful'})
         else:

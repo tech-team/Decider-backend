@@ -1,5 +1,6 @@
 import httplib
 import json
+from django.utils import timezone
 from decider_app.views.utils.response_builder import build_error_response
 from decider_app.views.utils.response_codes import CODE_REQUIRED_PARAMS_MISSING, CODE_INVALID_DATA
 
@@ -45,3 +46,12 @@ def require_post_data(*params):
                 return func(request, *args, **kwargs)
         return wrapped
     return decorator
+
+
+def track_activity(func):
+    def wrapped(request, *args, **kwargs):
+        if hasattr(request, 'request') and hasattr(request.request, 'resource_owner'):
+            user = request.request.resource_owner
+            user.update_last_active()
+        return func(request, *args, **kwargs)
+    return wrapped

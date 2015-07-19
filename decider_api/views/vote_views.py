@@ -4,7 +4,7 @@ from django.db import transaction
 from oauth2_provider.views import ProtectedResourceView
 from decider_api.db.vote import get_vote, insert_vote
 from decider_api.log_manager import logger
-from decider_api.utils.endpoint_decorators import require_post_data
+from decider_api.utils.endpoint_decorators import require_post_data, track_activity
 from decider_app.views.utils.response_builder import build_error_response, build_response
 from decider_app.views.utils.response_codes import CODE_INVALID_DATA, CODE_INVALID_ENTITY, CODE_CREATED, \
     I_CODE_ALREADY_VOTED, I_CODE_UNKNOWN_ENTITY, CODE_UNKNOWN_ENTITY
@@ -16,6 +16,7 @@ VOTE_ENTITIES = ['question', 'comment']
 class VoteEndpoint(ProtectedResourceView):
 
     @transaction.atomic
+    @track_activity
     @require_post_data(['entity', 'entity_id'])
     def post(self, request, *args, **kwargs):
         try:

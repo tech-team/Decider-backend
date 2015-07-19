@@ -4,7 +4,7 @@ from django.db import transaction
 from oauth2_provider.views import ProtectedResourceView
 from decider_api.db.comments import get_comments
 from decider_api.log_manager import logger
-from decider_api.utils.endpoint_decorators import require_post_data, require_params
+from decider_api.utils.endpoint_decorators import require_post_data, require_params, track_activity
 from decider_api.utils.helper import get_short_user_data, RepresentsInt, check_params_types, get_short_user_row_data, \
     str2bool
 from decider_app.models import Question, Comment
@@ -18,6 +18,7 @@ class CommentsEndpoint(ProtectedResourceView):
     ALLOWED_ORDER_FIELDS = ['creation_date', '-creation_date']
 
     @require_params(['question_id'])
+    @track_activity
     def get(self, request, *args, **kwargs):
         params = {
             'question_id': request.GET.get('question_id'),

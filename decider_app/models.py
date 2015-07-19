@@ -128,6 +128,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_anonymous = models.BooleanField(default=False)
 
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
+    last_active = models.DateTimeField(_(u'Последняя активность'), default=timezone.now)
 
     birthday = models.DateField(_(u'День рождения'), blank=True, null=True)
 
@@ -150,6 +151,10 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def get_dummy_password(self):
         return hashlib.md5(self.uid).hexdigest()
+
+    def update_last_active(self):
+        self.last_active = timezone.now()
+        self.save()
 
 class Category(models.Model):
     name = models.CharField(max_length=100, verbose_name=u'Название', null=True, blank=True)
