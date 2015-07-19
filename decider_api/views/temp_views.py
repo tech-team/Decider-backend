@@ -162,4 +162,4 @@ def send_push(request):
     data = {
         'data': 'data'
     }
-    gcm_helper.send_push(recipient, notification, data, dry_run=True)
+    return gcm_helper.send_push(recipient, notification, data, dry_run=True)

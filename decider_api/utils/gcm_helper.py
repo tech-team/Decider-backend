@@ -23,5 +23,9 @@ def send_push(reg_id, notification, data, dry_run=True):
         request_data.update({'dry_run': True})
 
     request.data = json.dumps(request_data)
-    response = session.send(request.prepare())
-    return HttpResponse()
+    resp = session.send(request.prepare())
+    response = HttpResponse(status=resp.status_code, content=resp.content)
+    for h in resp.headers:
+        setattr(response, h, resp.headers[h])
+
+    return response
