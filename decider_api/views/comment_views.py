@@ -100,17 +100,27 @@ class CommentsEndpoint(ProtectedResourceView):
             comment = Comment.objects.create(text=text, question=question,
                                              is_anonymous=is_anonymous,
                                              author=request.resource_owner)
-
-            data = {
-                "id": comment.id,
-                "text": comment.text,
-                "creation_date": comment.creation_date,
-                "question_id": question.id,
-                "is_anonymous": comment.is_anonymous,
-                "author": get_short_user_data(request.resource_owner)
-            }
             question.comments_count += 1
             question.save()
+
+            try:
+                last_seen_id = int(data.get('last_seen_id'))
+            except:
+                last_seen_id = None
+
+            comments = list(Comment.objects.filter(id__gte=last_seen_id).order_by('id')) if last_seen_id else [comment]
+
+            data = []
+            for cmt in comments:
+                data.append({
+                    "id": cmt.id,
+                    "text": cmt.text,
+                    "creation_date": cmt.creation_date,
+                    "question_id": question.id,
+                    "is_anonymous": cmt.is_anonymous,
+                    "author": get_short_user_data(cmt.author)
+                })
+
             return build_response(httplib.CREATED, CODE_CREATED, "Comment added", data=data)
 
         except Exception as e:
