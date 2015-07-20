@@ -4,12 +4,13 @@ import uuid
 from django.utils import timezone
 import os
 from oauth2_provider.views import ProtectedResourceView
+import re
 from decider_api.utils.endpoint_decorators import require_params
 from decider_api.utils.image_helper import IMAGE_SIZE
 from decider_app.models import Question, PollItem
 from decider_app.views.utils.response_builder import build_response, build_error_response
 from decider_app.views.utils.response_codes import CODE_CREATED, CODE_UNKNOWN_QUESTION
-from decider_backend.settings import MEDIA_ROOT
+from decider_backend.settings import MEDIA_ROOT, STATIC_ROOT
 
 
 class ShareEndpoint(ProtectedResourceView):
@@ -19,8 +20,8 @@ class ShareEndpoint(ProtectedResourceView):
 
     @require_params(['question_id'])
     def post(self, request, *args, **kwargs):
-        bg = Image.open("decider_app/static/img/share.png")
-        logo = Image.open("decider_app/static/img/logo.png")
+        bg = Image.open(os.path.join(STATIC_ROOT, "img", "share.png"))
+        logo = Image.open(os.path.join(STATIC_ROOT, "img", "logo.png"))
         logo_offset = ((self.OFFSETS[1][0] + self.OFFSETS[0][0] + IMAGE_SIZE[0] - logo.size[0])//2,
                        self.OFFSETS[0][1] + IMAGE_SIZE[1] - logo.size[1])
 
@@ -31,8 +32,8 @@ class ShareEndpoint(ProtectedResourceView):
             return build_error_response(httplib.NOT_FOUND, CODE_UNKNOWN_QUESTION, "Question unknown")
 
         image_size = (IMAGE_SIZE[0] - self.BORDER_SIZE, IMAGE_SIZE[1] - self.BORDER_SIZE)
-        left_img = ImageOps.expand(Image.open(os.path.join('decider_app', pi[0].picture.url)).resize(image_size), border=15, fill='grey')
-        right_img = ImageOps.expand(Image.open(os.path.join('decider_app', pi[1].picture.url)).resize(image_size), border=15, fill='grey')
+        left_img = ImageOps.expand(Image.open(os.path.join(re.sub("media/?", "", MEDIA_ROOT), pi[0].picture.url)).resize(image_size), border=15, fill='grey')
+        right_img = ImageOps.expand(Image.open(os.path.join(re.sub("media/?", "", MEDIA_ROOT), pi[1].picture.url)).resize(image_size), border=15, fill='grey')
 
         bg.paste(left_img, self.OFFSETS[0])
         bg.paste(right_img, self.OFFSETS[1])
