@@ -32,8 +32,10 @@ class ShareEndpoint(ProtectedResourceView):
             return build_error_response(httplib.NOT_FOUND, CODE_UNKNOWN_QUESTION, "Question unknown")
 
         image_size = (IMAGE_SIZE[0] - self.BORDER_SIZE, IMAGE_SIZE[1] - self.BORDER_SIZE)
-        left_img = ImageOps.expand(Image.open(os.path.join(re.sub("media/?", "", MEDIA_ROOT), pi[0].picture.url)).resize(image_size), border=15, fill='grey')
-        right_img = ImageOps.expand(Image.open(os.path.join(re.sub("media/?", "", MEDIA_ROOT), pi[1].picture.url)).resize(image_size), border=15, fill='grey')
+        left_img = ImageOps.expand(Image.open(os.path.join(MEDIA_ROOT, re.sub("media/?", "", pi[0].picture.url)))
+                                   .resize(image_size), border=15, fill='grey')
+        right_img = ImageOps.expand(Image.open(os.path.join(MEDIA_ROOT, re.sub("media/?", "", pi[1].picture.url)))
+                                    .resize(image_size), border=15, fill='grey')
 
         bg.paste(left_img, self.OFFSETS[0])
         bg.paste(right_img, self.OFFSETS[1])
