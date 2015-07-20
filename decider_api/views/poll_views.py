@@ -49,10 +49,11 @@ class PollEndpoint(ProtectedResourceView):
 
             votes_count = vote_on_poll(user_id, p.id, pi_id)
 
-            extra_fields = {'votes_count': votes_count}
+            data = {}
+            for pi in votes_count:
+                data[pi[0]] = pi[1]
 
-            return build_response(httplib.CREATED, CODE_CREATED, "Voted successfully",
-                                  extra_fields=extra_fields)
+            return build_response(httplib.CREATED, CODE_CREATED, "Voted successfully", data)
         except Exception as e:
             logger.exception(e)
             return build_error_response(httplib.INTERNAL_SERVER_ERROR,

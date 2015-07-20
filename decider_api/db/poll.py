@@ -18,9 +18,10 @@ UPDATE_QUERY = """UPDATE d_poll_item
                   SET votes_count = votes_count + 1
                   WHERE id={0}"""
 
-VOTES_QUERY = """SELECT votes_count
-                 FROM d_poll_item
-                 WHERE id={0}"""
+VOTES_QUERY = """SELECT d_poll_item.id, votes_count
+                  FROM d_poll
+                  LEFT JOIN d_poll_item ON d_poll_item.poll_id = d_poll.id
+                      WHERE d_poll.id={0}"""
 
 
 def check_poll_item(user_id, p_id, pi_id):
@@ -48,8 +49,8 @@ def vote_on_poll(user_id, poll_id, poll_item_id):
     query = UPDATE_QUERY.format(poll_item_id)
     cursor.execute(query)
 
-    query = VOTES_QUERY.format(poll_item_id)
+    query = VOTES_QUERY.format(poll_id)
     cursor.execute(query)
-    res = cursor.fetchone()[0]
+    res = cursor.fetchall()
 
     return res
