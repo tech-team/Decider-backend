@@ -7,8 +7,8 @@ from oauth2_provider.views import ProtectedResourceView
 from decider_api.utils.endpoint_decorators import require_params
 from decider_api.utils.image_helper import IMAGE_SIZE
 from decider_app.models import Question, PollItem
-from decider_app.views.utils.response_builder import build_response
-from decider_app.views.utils.response_codes import CODE_CREATED
+from decider_app.views.utils.response_builder import build_response, build_error_response
+from decider_app.views.utils.response_codes import CODE_CREATED, CODE_UNKNOWN_QUESTION
 from decider_backend.settings import MEDIA_ROOT
 
 
@@ -27,6 +27,9 @@ class ShareEndpoint(ProtectedResourceView):
         question_id = int(request.POST.get('question_id'))
 
         pi = PollItem.objects.filter(question_id=question_id).order_by('id')
+        if not pi:
+            return build_error_response(httplib.NOT_FOUND, CODE_UNKNOWN_QUESTION, "Question unknown")
+
         image_size = (IMAGE_SIZE[0] - self.BORDER_SIZE, IMAGE_SIZE[1] - self.BORDER_SIZE)
         left_img = ImageOps.expand(Image.open(os.path.join('decider_app', pi[0].picture.url)).resize(image_size), border=15, fill='grey')
         right_img = ImageOps.expand(Image.open(os.path.join('decider_app', pi[1].picture.url)).resize(image_size), border=15, fill='grey')
