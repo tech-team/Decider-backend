@@ -5,6 +5,7 @@ from decider_api.views.comment_views import CommentsEndpoint
 from decider_api.views.image_views import ImagesEndpoint
 from decider_api.views.poll_views import PollEndpoint
 from decider_api.views.question_views import QuestionsEndpoint, QuestionDetailsEndpoint
+from decider_api.views.share_views import ShareEndpoint
 from decider_api.views.user_data_views import UserDataEndpoint, UserEditEndpoint
 from decider_api.views.vote_views import VoteEndpoint
 
@@ -29,6 +30,8 @@ urlpatterns = patterns('',
     url(r'^categories/?$', CategoriesEndpoint.as_view(), name="categories"),
     url(r'^comments/?$', CommentsEndpoint.as_view(), name="comments"),
     url(r'^vote/?$', VoteEndpoint.as_view(), name="vote"),
+
+    url(r'^share/?$', ShareEndpoint.as_view(), name="share"),
 
     url(r'^logout/?$', auth_views.logout_view, name="logout_view"),
 

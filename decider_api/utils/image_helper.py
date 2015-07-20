@@ -9,8 +9,8 @@ from decider_backend.settings import MEDIA_ROOT
 
 
 SHARE_SIZE = (1400, 2000)
-IMAGE_SIZE = (1280, 720)
-PREVIEW_SIZE = (1280, 720)
+IMAGE_SIZE = (720, 1280)
+PREVIEW_SIZE = (720, 1280)
 
 
 def upload_image(image, preview=None, upload_to='other'):
