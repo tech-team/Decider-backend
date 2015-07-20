@@ -49,9 +49,12 @@ class PollEndpoint(ProtectedResourceView):
 
             votes_count = vote_on_poll(user_id, p.id, pi_id)
 
-            data = {}
+            data = []
             for pi in votes_count:
-                data[pi[0]] = pi[1]
+                data.append({
+                    "poll_item_id": pi[0],
+                    "votes_count": pi[1]
+                })
 
             return build_response(httplib.CREATED, CODE_CREATED, "Voted successfully", data)
         except Exception as e:
