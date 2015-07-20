@@ -2,7 +2,7 @@ import httplib
 import json
 from django.db import transaction
 from oauth2_provider.views import ProtectedResourceView
-from decider_api.db.vote import get_vote, insert_vote
+from decider_api.db.vote import get_vote, insert_vote, delete_vote
 from decider_api.log_manager import logger
 from decider_api.utils.endpoint_decorators import require_post_data, track_activity, require_params
 from decider_app.views.utils.response_builder import build_error_response, build_response
@@ -32,15 +32,16 @@ class VoteEndpoint(ProtectedResourceView):
                 return build_error_response(httplib.NOT_FOUND, CODE_UNKNOWN_ENTITY,
                                             msg="Unknown entity")
 
-            if res == I_CODE_ALREADY_VOTED:
-                return build_response(httplib.CREATED, CODE_CREATED,
-                                      msg="Vote successful", data={'entity_id': entity_id,
-                                                                   'likes_count': likes[0]})
+            already_voted = True if res == I_CODE_ALREADY_VOTED else False
 
-            likes = insert_vote(entity, entity_id, request.resource_owner.id)
+            if already_voted:
+                likes = delete_vote(entity, entity_id, request.resource_owner.id)
+            else:
+                likes = insert_vote(entity, entity_id, request.resource_owner.id)
 
             return build_response(httplib.CREATED, CODE_CREATED,
-                                  msg="Vote successful",  data={'entity_id': entity_id,
+                                  msg="Vote successful",  data={'voted': not already_voted,
+                                                                'entity_id': entity_id,
                                                                 'likes_count': likes[0]})
 
         except Exception as e:

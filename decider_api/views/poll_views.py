@@ -52,6 +52,7 @@ class PollEndpoint(ProtectedResourceView):
             data = []
             for pi in votes_count:
                 data.append({
+                    "voted": True if pi[0] == int(pi_id) else False,
                     "poll_item_id": pi[0],
                     "votes_count": pi[1]
                 })

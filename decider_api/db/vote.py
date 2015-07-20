@@ -13,9 +13,11 @@ GET_QUERY = """ SELECT d_{0}.id as {0}_id, d_{0}_likes.id as like_id
 INSERT_QUERY = """INSERT INTO d_{0}_likes (user_id, {0}_id)
                   VALUES ({1}, {2})"""
 
+DELETE_QUERY = """DELETE FROM d_{0}_likes
+                  WHERE user_id={1} AND {0}_id={2}"""
 
 ENTITY_UPDATE_QUERY = """UPDATE d_{0}
-                         SET likes_count = likes_count + 1
+                         SET likes_count = likes_count {2} 1
                          WHERE id = {1}"""
 
 LIKES_QUERY = """SELECT likes_count
@@ -45,7 +47,19 @@ def insert_vote(entity, entity_id, user_id):
     cursor = connection.cursor()
 
     cursor.execute(INSERT_QUERY.format(entity, user_id, entity_id))
-    cursor.execute(ENTITY_UPDATE_QUERY.format(entity, entity_id))
+    cursor.execute(ENTITY_UPDATE_QUERY.format(entity, entity_id, "+"))
+    cursor.execute(LIKES_QUERY.format(entity, entity_id))
+    res = cursor.fetchone()
+    cursor.close()
+
+    return res
+
+
+def delete_vote(entity, entity_id, user_id):
+    cursor = connection.cursor()
+
+    cursor.execute(DELETE_QUERY.format(entity, user_id, entity_id))
+    cursor.execute(ENTITY_UPDATE_QUERY.format(entity, entity_id, "-"))
     cursor.execute(LIKES_QUERY.format(entity, entity_id))
     res = cursor.fetchone()
     cursor.close()

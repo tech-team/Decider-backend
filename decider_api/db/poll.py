@@ -21,7 +21,8 @@ UPDATE_QUERY = """UPDATE d_poll_item
 VOTES_QUERY = """SELECT d_poll_item.id, votes_count
                   FROM d_poll
                   LEFT JOIN d_poll_item ON d_poll_item.poll_id = d_poll.id
-                      WHERE d_poll.id={0}"""
+                  WHERE d_poll.id={0}
+                  ORDER BY d_poll_item.id"""
 
 
 def check_poll_item(user_id, p_id, pi_id):
