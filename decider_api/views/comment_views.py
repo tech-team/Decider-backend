@@ -79,7 +79,7 @@ class CommentsEndpoint(ProtectedResourceView):
         try:
             data = json.loads(request.POST.get('data'))
             text = unicode(data.get('text')).strip(" ")
-            is_anonymous = str2bool(data.get("is_anonymous"))
+            is_anonymous = True if str2bool(data.get("is_anonymous")) is True else False
             question_id = 0
 
             errors = []
