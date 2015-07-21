@@ -20,4 +20,6 @@ def comment_notification(user_id, question_id, comment_id):
         'comment_id': comment_id
     }
     for receiver in receivers:
-        logger.error(send_push(receiver.registration_token, notification, data))
+        resp = send_push(receiver.registration_token, notification, data)
+        print(resp)
+        logger.error(resp)
