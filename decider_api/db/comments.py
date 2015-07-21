@@ -4,7 +4,8 @@ SELECT_QUERY = """ SELECT d_comment.id, d_comment.text, d_comment.creation_date,
                           d_comment.is_anonymous, d_comment.question_id,
                           author_user.first_name as author_first_name, author_user.last_name as author_last_name,
                           author_user.middle_name as author_middle_name, author_user.username as author_username,
-                          author_picture.url as author_image_url, author_user.id as author_id, author_user.uid as author_uid,
+                          author_picture.url as author_image_url, author_user.id as author_id,
+                          author_user.uid as author_uid, author_user.is_anonymous as author_anonymous,
                           d_comment_likes.id as voted
                    FROM d_comment
                    LEFT JOIN d_user as author_user ON d_comment.author_id = author_user.id

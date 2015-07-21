@@ -6,7 +6,7 @@ from django.db.models.loading import get_model
 from oauth2_provider.views import ProtectedResourceView
 from decider_api.log_manager import logger
 from decider_api.utils.endpoint_decorators import track_activity
-from decider_api.utils.helper import get_user_data
+from decider_api.utils.helper import get_user_data, str2bool
 from decider_api.utils.image_helper import upload_image
 from decider_app.models import User, Picture
 from decider_app.views.utils.response_builder import build_error_response, build_response
@@ -112,6 +112,10 @@ class UserDataEndpoint(ProtectedResourceView):
                                              uid=data.get('uid'),)
             user.avatar = picture
 
+        is_anonymous = str2bool(request.POST.get('is_anonymous'))
+        if is_anonymous is not None:
+            user.is_anonymous = is_anonymous
+
         user.save()
 
-        return build_response(httplib.CREATED, CODE_CREATED, "User successfully updated", get_user_data(user))
+        return build_response(httplib.CREATED, CODE_CREATED, "User successfully updated", get_user_data(user, force_deanon=True))

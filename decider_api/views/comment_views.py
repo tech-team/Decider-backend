@@ -49,14 +49,15 @@ class CommentsEndpoint(ProtectedResourceView):
                                                 limit=params['limit'], offset=params['offset'])
         comments = []
         for comment_row in comments_list:
+            is_anonymous = comment_row[c_columns.index('is_anonymous')]
             comments.append({
                 'id': comment_row[c_columns.index('id')],
                 'text': comment_row[c_columns.index('text')],
                 'creation_date': comment_row[c_columns.index('creation_date')],
                 'likes_count': comment_row[c_columns.index('likes_count')],
-                'author': get_short_user_row_data(comment_row, c_columns, 'author'),
+                'author': get_short_user_row_data(comment_row, c_columns, 'author', is_anonymous),
                 'voted': True if comment_row[c_columns.index('voted')] else False,
-                'is_anonymous': comment_row[c_columns.index('is_anonymous')],
+                'is_anonymous': is_anonymous,
                 'question_id': comment_row[c_columns.index('question_id')]
             })
 
@@ -121,7 +122,7 @@ class CommentsEndpoint(ProtectedResourceView):
                     "creation_date": cmt.creation_date,
                     "question_id": question.id,
                     "is_anonymous": cmt.is_anonymous,
-                    "author": get_short_user_data(cmt.author)
+                    "author": get_short_user_data(cmt.author, cmt.is_anonymous)
                 })
 
             return build_response(httplib.CREATED, CODE_CREATED, "Comment added", data=data)
