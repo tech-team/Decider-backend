@@ -1,4 +1,5 @@
 # coding=utf-8
+from decider_api.log_manager import logger
 from decider_api.utils.gcm_helper import send_push
 from push_service.app import app
 
@@ -19,4 +20,4 @@ def comment_notification(user_id, question_id, comment_id):
         'comment_id': comment_id
     }
     for receiver in receivers:
-        print(send_push(receiver.registration_token, notification, data))
+        logger.warning(send_push(receiver.registration_token, notification, data))
