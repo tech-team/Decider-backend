@@ -39,7 +39,7 @@ def login_view(request):
             if not data:
                 return build_error_response(httplib.INTERNAL_SERVER_ERROR, CODE_LOGIN_FAILED, "Login failed")
             else:
-                data.update({'user': get_user_data(user)})
+                data.update({'user': get_user_data(user, force_deanon=True)})
                 return build_response(httplib.OK, CODE_OK, "Login successful", data)
     else:
         return build_error_response(httplib.BAD_REQUEST, CODE_INSUFFICIENT_CREDENTIALS, 'Some fields are not filled')

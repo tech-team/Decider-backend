@@ -50,12 +50,13 @@ class CommentsEndpoint(ProtectedResourceView):
         comments = []
         for comment_row in comments_list:
             is_anonymous = comment_row[c_columns.index('is_anonymous')]
+            force_deanon = True if int(comment_row[c_columns.index('author_id')]) == request.resource_owner.id else False
             comments.append({
                 'id': comment_row[c_columns.index('id')],
                 'text': comment_row[c_columns.index('text')],
                 'creation_date': comment_row[c_columns.index('creation_date')],
                 'likes_count': comment_row[c_columns.index('likes_count')],
-                'author': get_short_user_row_data(comment_row, c_columns, 'author', is_anonymous),
+                'author': get_short_user_row_data(comment_row, c_columns, 'author', is_anonymous, force_deanon),
                 'voted': True if comment_row[c_columns.index('voted')] else False,
                 'is_anonymous': is_anonymous,
                 'question_id': comment_row[c_columns.index('question_id')]
@@ -116,13 +117,14 @@ class CommentsEndpoint(ProtectedResourceView):
 
             data = []
             for cmt in comments:
+                force_deanon = True if int(cmt.author_id) == request.resource_owner.id else False
                 data.append({
                     "id": cmt.id,
                     "text": cmt.text,
                     "creation_date": cmt.creation_date,
                     "question_id": question.id,
                     "is_anonymous": cmt.is_anonymous,
-                    "author": get_short_user_data(cmt.author, cmt.is_anonymous)
+                    "author": get_short_user_data(cmt.author, cmt.is_anonymous, force_deanon)
                 })
 
             return build_response(httplib.CREATED, CODE_CREATED, "Comment added", data=data)

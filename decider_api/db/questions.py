@@ -13,14 +13,18 @@ QUERY = """SELECT d_question.id, d_question.text, d_question.creation_date,
                   d_question.likes_count, d_question.comments_count, d_question.is_anonymous,
                   d_user.first_name as author_first_name, d_user.last_name as author_last_name,
                   d_user.middle_name as author_middle_name, d_user.username as author_username,
-                  d_user.uid as author_uid, d_picture.url as author_image_url, d_user.is_anonymous as author_anonymous,
-                  d_question_likes.id as voted
+                  d_user.uid as author_uid, d_picture.url as author_image_url,
+                  d_user.is_anonymous as author_anonymous, d_question_likes.id as voted,
+                  (likes_count + d_question.comments_count + sum(d_poll_item.votes_count)) as popularity
            FROM d_question
               LEFT JOIN d_user ON d_question.author_id = d_user.id
               LEFT JOIN d_picture ON d_picture.id = d_user.avatar_id
               LEFT JOIN d_poll ON d_question.id = d_poll.question_id
               LEFT JOIN d_question_likes ON d_question_likes.question_id = d_question.id
-                                        AND d_question_likes.user_id = {}"""
+                                        AND d_question_likes.user_id = {}
+              LEFT JOIN d_poll_item ON d_poll_item.poll_id = d_poll.id"""
+
+
 
 WHERE = " WHERE 1=1"
 
@@ -62,7 +66,7 @@ def get_new_questions(*args, **kwargs):
 
 
 def get_popular_questions(*args, **kwargs):
-    extras = GROUP_BY + " ORDER BY likes_count DESC"
+    extras = GROUP_BY + " ORDER BY popularity DESC"
     return get_questions(user_id=kwargs.get('user_id'),
                          limit=kwargs.get('limit'), offset=kwargs.get('offset'),
                          categories=kwargs.get('categories'), extras=extras)
@@ -77,7 +81,7 @@ def get_my_questions(*args, **kwargs):
 
 
 def get_question(user_id, q_id):
-    extras = " WHERE d_question.id=%s" % q_id
+    extras = " WHERE d_question.id=%s" % q_id + GROUP_BY
     cursor = connection.cursor()
     cursor.execute(QUERY.format(user_id) + extras)
     question = cursor.fetchone()

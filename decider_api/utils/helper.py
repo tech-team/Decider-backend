@@ -13,8 +13,8 @@ def str2bool(v):
     else:
         return v.lower() in ("yes", "true", "t", "1")
 
-def get_short_user_data(user, is_anonymous=False):
-    if is_anonymous or user.is_anonymous:
+def get_short_user_data(user, is_anonymous=False, force_deanon=False):
+    if (is_anonymous or user.is_anonymous) and not force_deanon:
         return {
             'uid': 'anonymous',
             "username": 'anonymous',
@@ -34,8 +34,8 @@ def get_short_user_data(user, is_anonymous=False):
         }
 
 
-def get_short_user_row_data(row, columns, prefix, is_anonymous=False):
-    if is_anonymous or row[columns.index(prefix + '_anonymous')]:
+def get_short_user_row_data(row, columns, prefix, is_anonymous=False, force_deanon=False):
+    if (is_anonymous or row[columns.index(prefix + '_anonymous')]) and not force_deanon:
         return {
             'uid': 'anonymous',
             "username": 'anonymous',

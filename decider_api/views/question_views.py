@@ -81,7 +81,7 @@ class QuestionsEndpoint(ProtectedResourceView):
                     'image_url': poll_item_row[pi_columns.index('image_url')],
                     'preview_url': poll_item_row[pi_columns.index('preview_url')],
                     'votes_count': poll_item_row[pi_columns.index('votes_count')],
-                    'voted': True if poll_item_row[pi_columns.index('voted')] else False
+                    'voted': True if poll_item_row[pi_columns.index('voted')] else False,
                 }
 
                 if not poll_items.get(q_id):
@@ -94,6 +94,7 @@ class QuestionsEndpoint(ProtectedResourceView):
                     poll = sorted(poll, key=lambda k: k['id'])
 
                 is_anonymous = question_row[q_columns.index('is_anonymous')]
+                force_deanon = True if tab == 'my' or int(question_row[q_columns.index('author_id')]) == request.resource_owner.id else False
                 question = {
                     'id': question_row[q_columns.index('id')],
                     'text': question_row[q_columns.index('text')],
@@ -101,10 +102,10 @@ class QuestionsEndpoint(ProtectedResourceView):
                     'category_id': question_row[q_columns.index('category_id')],
                     'likes_count': question_row[q_columns.index('likes_count')],
                     'comments_count': question_row[q_columns.index('comments_count')],
-                    'author': get_short_user_row_data(question_row, q_columns, 'author', is_anonymous),
+                    'author': get_short_user_row_data(question_row, q_columns, 'author', is_anonymous, force_deanon),
                     'poll': poll,
                     'is_anonymous': is_anonymous,
-                    'voted': True if question_row[q_columns.index('voted')] else False
+                    'voted': True if question_row[q_columns.index('voted')] else False,
                 }
 
                 questions.append(question)
@@ -200,7 +201,7 @@ class QuestionsEndpoint(ProtectedResourceView):
                 "text": question.text,
                 "creation_date": question.creation_date,
                 "category_id": category.id,
-                "author": get_short_user_data(request.resource_owner, is_anonymous),
+                "author": get_short_user_data(request.resource_owner, force_deanon=True),
                 "poll": data_poll,
                 "is_anonymous": question.is_anonymous,
                 "likes_count": question.likes_count
@@ -232,12 +233,13 @@ class QuestionDetailsEndpoint(ProtectedResourceView):
                                             "Question with specified id was not found")
 
             is_anonymous = question_row[q_columns.index('is_anonymous')]
+            force_deanon = True if int(question_row[q_columns.index('author_id')]) == request.resource_owner.id else False
             question = {
                 'id': question_row[q_columns.index('id')],
                 'text': question_row[q_columns.index('text')],
                 'creation_date': question_row[q_columns.index('creation_date')],
                 'category_id': question_row[q_columns.index('category_id')],
-                'author': get_short_user_row_data(question_row, q_columns, 'author', is_anonymous),
+                'author': get_short_user_row_data(question_row, q_columns, 'author', is_anonymous, force_deanon),
                 'likes_count': question_row[q_columns.index('likes_count')],
                 'is_anonymous': is_anonymous,
                 'voted': True if question_row[q_columns.index('voted')] else False
@@ -264,14 +266,16 @@ class QuestionDetailsEndpoint(ProtectedResourceView):
                 comments = []
                 comments_list, c_columns = get_comments(request.resource_owner.id, question['id'])
                 for comment_row in comments_list:
+                    is_anonymous = comment_row[c_columns.index('is_anonymous')]
+                    force_deanon = True if int(comment_row[c_columns.index('author_id')]) == request.resource_owner.id else False
                     comments.append({
                         'id': comment_row[c_columns.index('id')],
                         'text': comment_row[c_columns.index('text')],
                         'creation_date': comment_row[c_columns.index('creation_date')],
                         'likes_count': comment_row[c_columns.index('likes_count')],
-                        'author': get_short_user_row_data(question_row, q_columns, 'author'),
+                        'author': get_short_user_row_data(question_row, q_columns, 'author', is_anonymous, force_deanon),
                         'voted': True if comment_row[c_columns.index('voted')] else False,
-                        'is_anonymous': comment_row[c_columns.index('is_anonymous')]
+                        'is_anonymous': is_anonymous
                     })
                 question['comments'] = comments
             else:
