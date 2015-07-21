@@ -16,6 +16,7 @@ def send_push(reg_id, notification, data, dry_run=True):
 
     request_data = {
         'to': reg_id,
+        'registration_ids': [reg_id],
         'notification': notification,
         'data': data
     }

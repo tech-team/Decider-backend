@@ -3,8 +3,11 @@ import hashlib
 import uuid
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+from push_service.tasks.comment_notification import comment_notification
 
 
 def get_random_uid():
@@ -213,6 +216,12 @@ class Comment(models.Model):
     def __unicode__(self):
         return "Comment #" + str(self.id) + " by " + self.author.uid
 
+    @staticmethod
+    def comment_handler(sender, **kwargs):
+        comment = kwargs.get('instance')
+        comment_notification.delay(user_id=comment.question.author.id,
+                                   question_id=comment.question.id,
+                                   comment_id=comment.id)
 
 class CommentLike(models.Model):
     class Meta:
@@ -301,3 +310,5 @@ class LocaleCategory(models.Model):
     def __unicode__(self):
         return "Locale " + self.locale.name + " for category " + str(self.category.id)
 
+
+post_save.connect(Comment.comment_handler, sender=Comment)
