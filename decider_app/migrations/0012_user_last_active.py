@@ -12,9 +12,9 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='user',
-            name='last_active',
-            field=models.DateTimeField(default=django.utils.timezone.now, verbose_name='\u041f\u043e\u0441\u043b\u0435\u0434\u043d\u044f\u044f \u0430\u043a\u0442\u0438\u0432\u043d\u043e\u0441\u0442\u044c'),
-        ),
+        # migrations.AddField(
+        #     model_name='user',
+        #     name='last_active',
+        #     field=models.DateTimeField(default=django.utils.timezone.now, verbose_name='\u041f\u043e\u0441\u043b\u0435\u0434\u043d\u044f\u044f \u0430\u043a\u0442\u0438\u0432\u043d\u043e\u0441\u0442\u044c'),
+        # ),
     ]

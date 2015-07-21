@@ -1,4 +1,5 @@
 import httplib
+import os
 import dateutil.parser
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.loading import get_model
@@ -6,7 +7,8 @@ from oauth2_provider.views import ProtectedResourceView
 from decider_api.log_manager import logger
 from decider_api.utils.endpoint_decorators import track_activity
 from decider_api.utils.helper import get_user_data
-from decider_app.models import User
+from decider_api.utils.image_helper import upload_image
+from decider_app.models import User, Picture
 from decider_app.views.utils.response_builder import build_error_response, build_response
 from decider_app.views.utils.response_codes import CODE_UNKNOWN_USER, CODE_INVALID_DATA, CODE_OK, \
     CODE_CREATED, CODE_SERVER_ERROR, CODE_USERNAME_TAKEN, CODE_REGISTRATION_UNFINISHED, CODE_INSUFFICIENT_CREDENTIALS
@@ -45,9 +47,9 @@ class UserDataEndpoint(ProtectedResourceView):
             return build_error_response(httplib.INTERNAL_SERVER_ERROR, CODE_SERVER_ERROR,
                                         "Failed to fetch user")
 
+    @track_activity
     def post(self, request, *args, **kwargs):
         user = request.resource_owner
-
         username = request.POST.get('username')
 
         if not username and not user.registration_finished():
@@ -61,9 +63,6 @@ class UserDataEndpoint(ProtectedResourceView):
             else:
                 user.username = username
 
-    @track_activity
-    def post(self, request, *args, **kwargs):
-        user = request.resource_owner
         for field in ['first_name', 'last_name', 'city', 'about']:
             value = request.POST.get(field)
             if value is not None:
@@ -99,6 +98,19 @@ class UserDataEndpoint(ProtectedResourceView):
                 user.gender = False
             else:
                 user.gender = None
+
+        avatar = request.FILES.get('avatar')
+        if avatar:
+            result = upload_image(avatar, upload_to='avatars')
+            error = result.get('error')
+            if error:
+                return build_error_response(*error, errors=['avatar'])
+
+            data = result.get('data')
+
+            picture = Picture.objects.create(url=os.path.join('media', data.get('image_url')),
+                                             uid=data.get('uid'),)
+            user.avatar = picture
 
         user.save()
 
