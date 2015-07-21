@@ -2,7 +2,8 @@ import httplib
 import json
 from django.utils import timezone
 from decider_app.views.utils.response_builder import build_error_response
-from decider_app.views.utils.response_codes import CODE_REQUIRED_PARAMS_MISSING, CODE_INVALID_DATA
+from decider_app.views.utils.response_codes import CODE_REQUIRED_PARAMS_MISSING, CODE_INVALID_DATA, \
+    CODE_REGISTRATION_UNFINISHED
 
 
 def require_params(*params):
@@ -54,4 +55,14 @@ def track_activity(func):
             user = request.request.resource_owner
             user.update_last_active()
         return func(request, *args, **kwargs)
+    return wrapped
+
+
+def require_registration(func):
+    def wrapped(request, *args, **kwargs):
+        if request.request.resource_owner.is_authenticated() and request.request.resource_owner.registration_finished():
+            return func(request, *args, **kwargs)
+        else:
+            return build_error_response(httplib.BAD_REQUEST, CODE_REGISTRATION_UNFINISHED,
+                                        "Registration unfinished")
     return wrapped

@@ -1,10 +1,9 @@
 import httplib
-import json
 from django.db import transaction
 from oauth2_provider.views import ProtectedResourceView
 from decider_api.db.vote import get_vote, insert_vote, delete_vote
 from decider_api.log_manager import logger
-from decider_api.utils.endpoint_decorators import require_post_data, track_activity, require_params
+from decider_api.utils.endpoint_decorators import require_registration, track_activity, require_params
 from decider_app.views.utils.response_builder import build_error_response, build_response
 from decider_app.views.utils.response_codes import CODE_INVALID_DATA, CODE_INVALID_ENTITY, CODE_CREATED, \
     I_CODE_ALREADY_VOTED, I_CODE_UNKNOWN_ENTITY, CODE_UNKNOWN_ENTITY
@@ -18,6 +17,7 @@ class VoteEndpoint(ProtectedResourceView):
     @transaction.atomic
     @track_activity
     @require_params(['entity', 'entity_id'])
+    @require_registration
     def post(self, request, *args, **kwargs):
         try:
             entity = request.POST.get('entity')

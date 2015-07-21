@@ -1,26 +1,23 @@
 import httplib
-import json
-from PIL import Image
 import os
-import uuid
 from django.db import transaction
-from django.utils import timezone
 from oauth2_provider.views import ProtectedResourceView
 from decider_api.db.comments import get_comments
 from decider_api.db.poll_items import get_poll_items
 from decider_api.db.questions import tab_switch, get_question
 from decider_api.log_manager import logger
-from decider_api.utils.endpoint_decorators import require_post_data, require_params, track_activity
+from decider_api.utils.endpoint_decorators import require_params, require_registration, track_activity
 from decider_api.utils.helper import get_short_user_data, get_short_user_row_data, str2bool
-from decider_api.utils.image_helper import IMAGE_SIZE, PREVIEW_SIZE
-from decider_app.models import Question, Category, User, Poll, PollItem, Picture
+from decider_api.utils.image_helper import upload_image
+from decider_app.models import Question, Category, Poll, PollItem, Picture
 from decider_app.views.utils.response_builder import build_response, build_error_response
 from decider_app.views.utils.response_codes import *
-from decider_backend.settings import MEDIA_ROOT
 
 
 class QuestionsEndpoint(ProtectedResourceView):
+
     @track_activity
+    @require_registration
     def get(self, request, *args, **kwargs):
         try:
             tab = request.GET.get('tab')
@@ -123,6 +120,7 @@ class QuestionsEndpoint(ProtectedResourceView):
     @transaction.atomic
     @track_activity
     @require_params(['text', 'category_id'])
+    @require_registration
     def post(self, request, *args, **kwargs):
         try:
             text = request.POST.get("text")
@@ -175,44 +173,15 @@ class QuestionsEndpoint(ProtectedResourceView):
                 image = request.FILES.get(poll_num + '_image')
                 preview = request.FILES.get(poll_num + '_preview')
 
-                cur_time = timezone.now().strftime('%s')
-                uid = uuid.uuid4().hex
-                filename = uid + '.jpg'
-                preview_filename = uid + '_preview.jpg'
-                dirname = os.path.join('images', 'polls', cur_time[:5], cur_time[5:6])
-                url = os.path.join(dirname, filename)
-                preview_url = os.path.join(dirname, preview_filename)
+                result = upload_image(image, preview, 'polls')
+                error = result.get('error')
+                if error:
+                    return build_error_response(*error, errors=[poll_num])
+                data = result.get('data')
 
-                if not os.path.exists(os.path.join(MEDIA_ROOT, dirname)):
-                    os.makedirs(os.path.join(MEDIA_ROOT, dirname))
-
-                invalid_fields = []
-                try:
-                    img = Image.open(image)
-                    resize_scale = max(float(img.size[0])/IMAGE_SIZE[0], float(img.size[1])/IMAGE_SIZE[1])
-                    if resize_scale > 1:
-                        img = img.resize((int(img.size[0]/resize_scale), int(img.size[1]/resize_scale)))
-                    img.save(os.path.join(MEDIA_ROOT, url), 'JPEG', quality=95)
-                except Exception as e:
-                    logger.exception(e)
-                    invalid_fields.append(poll_num + '_image')
-
-                try:
-                    preview = Image.open(preview)
-                    resize_scale = max(float(preview.size[0])/PREVIEW_SIZE[0], float(preview.size[1])/PREVIEW_SIZE[1])
-                    if resize_scale > 1:
-                        preview = preview.resize((int(preview.size[0]/resize_scale), int(preview.size[1]/resize_scale)))
-                    preview.save(os.path.join(MEDIA_ROOT, preview_url), 'JPEG', quality=95)
-                except Exception as e:
-                    logger.exception(e)
-                    invalid_fields.append(poll_num + '_preview')
-
-                if invalid_fields:
-                    return build_error_response(httplib.BAD_REQUEST, CODE_INVALID_DATA,
-                                                "Some fields are invalid", invalid_fields)
-
-                picture = Picture.objects.create(url=os.path.join('media', url), uid=uid,
-                                                 preview_url=os.path.join('media', preview_url))
+                picture = Picture.objects.create(url=os.path.join('media', data.get('image_url')),
+                                                 preview_url=os.path.join('media', data.get('preview_url')),
+                                                 uid=data.get('uid'),)
 
                 pi = PollItem.objects.create(poll=question_poll, question=question,
                                              text=text, picture=picture)
@@ -244,6 +213,7 @@ class QuestionsEndpoint(ProtectedResourceView):
 
 
 class QuestionDetailsEndpoint(ProtectedResourceView):
+    @require_registration
     def get(self, request, *args, **kwargs):
         try:
 

@@ -1,49 +1,33 @@
 # coding=utf-8
 import httplib
-import urllib
-import urllib2
 import uuid
 from django.contrib.auth import authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
-from decider_api.utils.endpoint_decorators import require_params
 from decider_api.utils.helper import get_user_data, BACKENDS
 
-from decider_app.models import User, SocialSite
+from decider_app.models import User
 from decider_app.views.utils.auth_helper import get_token_data
 from decider_app.views.utils.response_builder import build_response, build_error_response
 from decider_app.views.utils.response_codes import CODE_OK, CODE_INVALID_CREDENTIALS, CODE_LOGIN_FAILED, \
-    CODE_INSUFFICIENT_CREDENTIALS, CODE_UNKNOWN_SOCIAL, CODE_REQUIRED_PARAMS_MISSING, CODE_INVALID_TOKEN, CODE_CREATED
+    CODE_INSUFFICIENT_CREDENTIALS, CODE_REQUIRED_PARAMS_MISSING, CODE_INVALID_TOKEN, CODE_CREATED, \
+    CODE_REGISTRATION_UNFINISHED
 
 
 @require_http_methods(['POST'])
 def login_view(request):
     email = request.POST.get('email')
 
-    social_name = request.POST.get('social_name')
-    social_id = request.POST.get('social_id')
-
     password = request.POST.get('password')
-    if password and (email or social_name and social_id):
-        if email:
-            user = authenticate(email=email, password=password)
-        else:
-            social_name = str(social_name)
-            social_id = str(social_id)
-            try:
-                social_site = SocialSite.objects.get(name=social_name)
-            except SocialSite.DoesNotExist:
-                return build_error_response(httplib.NOT_FOUND, CODE_UNKNOWN_SOCIAL,
-                                            'Unknown social site')
-
-            user = authenticate(social_id=social_id, social_site=social_site,
-                                password=password)
-            user.update_last_active()
-
+    if password and email:
+        user = authenticate(email=email, password=password)
         if not user:
             return build_error_response(httplib.BAD_REQUEST, CODE_INVALID_CREDENTIALS, 'Invalid credentials')
+        elif not user.registration_finished():
+            return build_error_response(httplib.BAD_REQUEST, CODE_REGISTRATION_UNFINISHED,
+                                        "Registration unfinished")
         else:
             data = get_token_data(
                 'password',
@@ -65,42 +49,18 @@ def login_view(request):
 def registration_view(request):
     email = request.POST.get('email')
 
-    social_name = request.POST.get('social_name')
-    social_id = request.POST.get('social_id')
-
     password = request.POST.get('password')
-    if password and (email or social_name and social_id):
-        if email:
-            try:
-                User.objects.get(email=email)
+    if password and email:
+        try:
+            User.objects.get(email=email)
 
-            except User.DoesNotExist:
-                user = User(email=email, uid=uuid.uuid4().hex)
-                user.set_password(password)
-                user.save()
+        except User.DoesNotExist:
+            user = User(email=email, uid=uuid.uuid4().hex)
+            user.set_password(password)
+            user.save()
 
-            user = authenticate(email=email, password=password)
-        else:
-            social_name = str(social_name)
-            social_id = str(social_id)
-            try:
-                social_site = SocialSite.objects.get(name=social_name)
-            except SocialSite.DoesNotExist:
-                return build_error_response(httplib.NOT_FOUND, CODE_UNKNOWN_SOCIAL,
-                                            'Unknown social site')
+        user = authenticate(email=email, password=password)
 
-            try:
-                User.objects.get(social_id=social_id, social_site=social_site)
-
-            except User.DoesNotExist:
-                user = User(social_id=social_id, social_site=social_site,
-                            uid=uuid.uuid4().hex)
-                user.email = user.uid
-                user.set_password(password)
-                user.save()
-
-            user = authenticate(social_id=social_id, social_site=social_site,
-                                password=password)
         if not user:
             return build_error_response(httplib.BAD_REQUEST, CODE_INVALID_CREDENTIALS,
                                         "Invalid credentials")

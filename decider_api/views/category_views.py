@@ -1,7 +1,7 @@
 import httplib
 from oauth2_provider.views import ProtectedResourceView
 from decider_api.db.categories import get_categories
-from decider_api.utils.endpoint_decorators import require_params
+from decider_api.utils.endpoint_decorators import require_params, require_registration
 from decider_app.models import Locale
 from decider_app.views.utils.response_builder import build_response
 from decider_app.views.utils.response_codes import CODE_OK
@@ -9,6 +9,7 @@ from decider_app.views.utils.response_codes import CODE_OK
 
 class CategoriesEndpoint(ProtectedResourceView):
     @require_params(['locale'])
+    @require_registration
     def get(self, request, *args, **kwargs):
 
         try:

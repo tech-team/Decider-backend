@@ -1,14 +1,14 @@
 import httplib
-import json
-from django.db import transaction, IntegrityError
+from django.db import transaction
 from oauth2_provider.views import ProtectedResourceView
 from decider_api.db.poll import vote_on_poll, check_poll_item
 from decider_api.log_manager import logger
-from decider_api.utils.endpoint_decorators import require_post_data, require_params, track_activity
-from decider_app.models import Vote, Poll, PollItem, Question
+from decider_api.utils.endpoint_decorators import require_params, \
+    require_registration, track_activity
+from decider_app.models import Question
 from decider_app.views.utils.response_builder import build_error_response, build_response
-from decider_app.views.utils.response_codes import CODE_INVALID_DATA, CODE_CREATED, CODE_UNKNOWN_POLL, \
-    CODE_UNKNOWN_POLL_ITEM, CODE_SERVER_ERROR, CODE_UNKNOWN_POLL_DATA, CODE_ALREADY_VOTED, I_CODE_UNKNOWN_ENTITY, \
+from decider_app.views.utils.response_codes import CODE_CREATED, CODE_UNKNOWN_POLL, \
+    CODE_UNKNOWN_POLL_ITEM, CODE_SERVER_ERROR, CODE_ALREADY_VOTED, I_CODE_UNKNOWN_ENTITY, \
     I_CODE_NO_MATCH, I_CODE_ALREADY_VOTED, CODE_UNKNOWN_QUESTION
 
 
@@ -17,6 +17,7 @@ class PollEndpoint(ProtectedResourceView):
     @track_activity
     @transaction.atomic
     @require_params(['question_id', 'poll_item_id'])
+    @require_registration
     def post(self, request, *args, **kwargs):
         try:
 

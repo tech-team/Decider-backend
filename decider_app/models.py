@@ -110,11 +110,11 @@ class User(AbstractBaseUser, PermissionsMixin):
         unique_together = ('social_site', 'social_id',)
 
     email = models.EmailField(_('email address'), max_length=100, default=True, null=True, unique=True)
-    uid = models.CharField(_('unique id for user'), max_length=50, unique=True)
+    uid = models.CharField(_('unique id for user'), max_length=50, unique=True, db_index=True)
     social_site = models.ForeignKey(SocialSite, blank=True, null=True)
     social_id = models.CharField(_('social site id'), max_length=100, blank=True, null=True)
 
-    username = models.CharField(_('username'), max_length=50, blank=True, default='')
+    username = models.CharField(_('username'), max_length=50, blank=True, default='', db_index=True)
     first_name = models.CharField(_('first name'), max_length=50, blank=True, default='')
     last_name = models.CharField(_('last name'), max_length=50, blank=True, default='')
     middle_name = models.CharField(_('middle_name'), max_length=50, blank=True, default='')
@@ -135,7 +135,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     country = models.ForeignKey(Country, on_delete=models.SET_NULL, blank=True, null=True)
     city = models.CharField(_(u'Город'), max_length=50, blank=True)
     about = models.TextField(_(u'О себе'), max_length=1000, blank=True)
-    gender = models.BooleanField(_(u'Пол'), blank=True, default=False)
+    gender = models.NullBooleanField(_(u'Пол'), blank=True, null=True, default=False)
 
     avatar = models.OneToOneField(Picture, blank=True, null=True)
 
@@ -155,6 +155,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     def update_last_active(self):
         self.last_active = timezone.now()
         self.save()
+
+    def registration_finished(self):
+        return self.username != '' and User.objects.filter(username=self.username).count() == 1
+
 
 class Category(models.Model):
     name = models.CharField(max_length=100, verbose_name=u'Название', null=True, blank=True)

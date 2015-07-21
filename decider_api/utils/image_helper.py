@@ -13,7 +13,7 @@ IMAGE_SIZE = (720, 1280)
 PREVIEW_SIZE = (720, 1280)
 
 
-def upload_image(image, preview=None, upload_to='other'):
+def upload_image(image, preview=None, upload_to='misc'):
 
     response = {}
 

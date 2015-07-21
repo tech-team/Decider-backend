@@ -252,7 +252,7 @@ SOCIAL_AUTH_PIPELINE = (
 
     # Make up a username for this person, appends a random string at the end if
     # there's any collision.
-    'social.pipeline.user.get_username',
+    # 'social.pipeline.user.get_username',
 
     # Send a validation email to the user to verify its email address.
     # Disabled by default.
