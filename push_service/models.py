@@ -31,6 +31,7 @@ class NotificationHistory(models.Model):
     ACTIONS = (('new', 'new'),)
 
     client = models.ForeignKey(GcmClient)
+    user = models.ForeignKey(User, null=True, blank=True)
     entity = models.CharField(max_length=255, choices=ENTITIES)
     entity_id = models.IntegerField()
     action = models.CharField(max_length=255, choices=ACTIONS)
