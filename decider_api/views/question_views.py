@@ -332,3 +332,5 @@ def create_share_image(question_id):
     pic = Picture.objects.create(url=os.path.join('media', url), uid=uid)
     question.share_image = pic
     question.save()
+
+    return question

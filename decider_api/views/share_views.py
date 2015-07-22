@@ -8,6 +8,7 @@ import os
 from oauth2_provider.views import ProtectedResourceView
 import re
 from decider_api.utils.endpoint_decorators import require_params
+from decider_api.views.question_views import create_share_image
 from decider_app.models import Question, PollItem
 from decider_app.views.utils.response_builder import build_response, build_error_response
 from decider_app.views.utils.response_codes import CODE_CREATED, CODE_UNKNOWN_QUESTION
@@ -16,13 +17,11 @@ from decider_backend.settings import MEDIA_ROOT, STATIC_ROOT
 
 def get_image_view(request, question_id):
     try:
-        image = Question.objects.get(id=question_id).share_image
-        if image:
-            with open(os.path.join(MEDIA_ROOT, re.sub("media/?", "", image.url)), "rb") as f:
-                return HttpResponse(f.read(), content_type="image/jpeg")
-        else:
-            # TODO: create image here
-            return HttpResponseNotFound()
+        question = Question.objects.get(id=question_id)
+        if not question.share_image:
+            question = create_share_image(question_id)
+        with open(os.path.join(MEDIA_ROOT, re.sub("media/?", "", question.share_image.url)), "rb") as f:
+            return HttpResponse(f.read(), content_type="image/jpeg")
     except ObjectDoesNotExist:
         return HttpResponseNotFound()
     except IOError:
