@@ -1,6 +1,8 @@
 import httplib
 from PIL import Image, ImageOps
 import uuid
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import HttpResponse, HttpResponseNotFound
 from django.utils import timezone
 import os
 from oauth2_provider.views import ProtectedResourceView
@@ -10,6 +12,24 @@ from decider_app.models import Question, PollItem
 from decider_app.views.utils.response_builder import build_response, build_error_response
 from decider_app.views.utils.response_codes import CODE_CREATED, CODE_UNKNOWN_QUESTION
 from decider_backend.settings import MEDIA_ROOT, STATIC_ROOT
+
+
+def get_image_view(request, question_id):
+    try:
+        image = Question.objects.get(id=question_id).share_image
+        if image:
+            with open(os.path.join(MEDIA_ROOT, re.sub("media/?", "", image.url)), "rb") as f:
+                return HttpResponse(f.read(), content_type="image/jpeg")
+        else:
+            # TODO: create image here
+            return HttpResponseNotFound()
+    except ObjectDoesNotExist:
+        return HttpResponseNotFound()
+    except IOError:
+        red = Image.new('RGBA', (1, 1), (255, 0, 0, 0))
+        response = HttpResponse(content_type="image/jpeg")
+        red.save(response, "JPEG")
+        return response
 
 
 class ShareEndpoint(ProtectedResourceView):

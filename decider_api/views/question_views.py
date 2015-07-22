@@ -1,7 +1,11 @@
 import httplib
+from PIL import Image
+import uuid
+from django.utils import timezone
 import os
 from django.db import transaction
 from oauth2_provider.views import ProtectedResourceView
+import re
 from decider_api.db.comments import get_comments
 from decider_api.db.poll_items import get_poll_items
 from decider_api.db.questions import tab_switch, get_question
@@ -12,6 +16,8 @@ from decider_api.utils.image_helper import upload_image
 from decider_app.models import Question, Category, Poll, PollItem, Picture
 from decider_app.views.utils.response_builder import build_response, build_error_response
 from decider_app.views.utils.response_codes import *
+from decider_backend.settings import STATIC_ROOT, MEDIA_ROOT
+from push_service.app import app
 
 
 class QuestionsEndpoint(ProtectedResourceView):
@@ -148,7 +154,7 @@ class QuestionsEndpoint(ProtectedResourceView):
                 return build_error_response(httplib.BAD_REQUEST, CODE_REQUIRED_PARAMS_MISSING,
                                             "Required params are missing", errors)
 
-            is_anonymous = str2bool(request.POST.get("is_anonymous"))
+            is_anonymous = True if str2bool(request.POST.get("is_anonymous")) is True else False
 
             try:
                 category_id = int(request.POST.get("category_id"))
@@ -206,6 +212,7 @@ class QuestionsEndpoint(ProtectedResourceView):
                 "is_anonymous": question.is_anonymous,
                 "likes_count": question.likes_count
             }
+            create_share_image.delay(question_id=question.id)
 
             return build_response(httplib.CREATED, CODE_CREATED, "Question added", data)
         except Exception as e:
@@ -287,3 +294,41 @@ class QuestionDetailsEndpoint(ProtectedResourceView):
             logger.exception(e)
             return build_error_response(httplib.INTERNAL_SERVER_ERROR, CODE_SERVER_ERROR,
                                         "Failed to get question details")
+
+
+@app.task()
+def create_share_image(question_id):
+    share_image_size = (360, 640)
+    offsets = ((90, 44), (647, 44))
+    question = Question.objects.get(id=question_id)
+
+    bg = Image.open(os.path.join(STATIC_ROOT, "img", "share.png"))
+    # logo = Image.open(os.path.join(STATIC_ROOT, "img", "logo.png"))
+    # logo_offset = ((self.OFFSETS[1][0] + self.OFFSETS[0][0] + self.SHARE_IMAGE_SIZE[0] - logo.size[0])//2,
+    #                self.OFFSETS[0][1] + self.SHARE_IMAGE_SIZE[1] - logo.size[1])
+
+    pi = PollItem.objects.filter(question_id=question_id).order_by('id')
+    if not pi:
+        return build_error_response(httplib.NOT_FOUND, CODE_UNKNOWN_QUESTION, "Question unknown")
+
+    left_img = Image.open(os.path.join(MEDIA_ROOT, re.sub("media/?", "", pi[0].picture.url))).resize(share_image_size)
+    right_img = Image.open(os.path.join(MEDIA_ROOT, re.sub("media/?", "", pi[1].picture.url))).resize(share_image_size)
+
+    bg.paste(left_img, offsets[0])
+    bg.paste(right_img, offsets[1])
+    # bg.paste(logo, logo_offset, logo)
+
+    cur_time = timezone.now().strftime('%s')
+    uid = uuid.uuid4().hex
+    filename = uid + '.jpg'
+    dirname = os.path.join('images', 'share', cur_time[:5], cur_time[5:6])
+    url = os.path.join(dirname, filename)
+
+    if not os.path.exists(os.path.join(MEDIA_ROOT, dirname)):
+        os.makedirs(os.path.join(MEDIA_ROOT, dirname))
+
+    bg.save(os.path.join(MEDIA_ROOT, url), 'JPEG', quality=95)
+
+    pic = Picture.objects.create(url=os.path.join('media', url), uid=uid)
+    question.share_image = pic
+    question.save()

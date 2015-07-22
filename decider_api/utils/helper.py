@@ -114,4 +114,3 @@ def check_params_types(params, cast_type=int):
             except ValueError:
                 errors.append(param)
     return errors
-

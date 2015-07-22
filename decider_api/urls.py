@@ -30,7 +30,7 @@ urlpatterns = patterns('',
     url(r'^comments/?$', CommentsEndpoint.as_view(), name="comments"),
     url(r'^vote/?$', VoteEndpoint.as_view(), name="vote"),
 
-    url(r'^share/?$', ShareEndpoint.as_view(), name="share"),
+    # url(r'^share/?$', ShareEndpoint.as_view(), name="share"),
 
     url(r'^logout/?$', auth_views.logout_view, name="logout_view"),
 

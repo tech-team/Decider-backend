@@ -9,7 +9,8 @@ __author__ = 'snake'
 
 @app.task()
 def comment_notification(user_id, question_id, comment_id):
-    from push_service.models import GcmClient
+    from push_service.models import NotificationHistory, GcmClient
+
     receivers = GcmClient.objects.filter(user_id=user_id)
     data = {
         'code': CODE_NEW_COMMENT,
@@ -17,5 +18,7 @@ def comment_notification(user_id, question_id, comment_id):
         'comment_id': comment_id
     }
     for receiver in receivers:
-        resp = send_push(receiver.registration_token, data)
-        logger.error(resp)
+        if NotificationHistory.objects.filter(client=receiver, entity='comment', action='new').count() == 0:
+            NotificationHistory.objects.create(client=receiver, entity='comment', action='new', entity_id=comment_id)
+            resp = send_push(receiver.registration_token, data)
+            logger.error(resp)

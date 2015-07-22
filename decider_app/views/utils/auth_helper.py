@@ -7,6 +7,17 @@ from decider_api.log_manager import logger
 from decider_backend.settings import OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, HOST_SCHEMA, HOST_ADDRESS, HOST_PORT
 
 
+def encoded_dict(in_dict):
+    out_dict = {}
+    for k, v in in_dict.iteritems():
+        if isinstance(v, unicode):
+            v = v.encode('utf8')
+        elif isinstance(v, str):
+            # Must be encoded in UTF-8
+            v.decode('utf8')
+        out_dict[k] = v
+    return out_dict
+
 def grant_type_switch(case):
     return {
         "password": build_token_request_data,
@@ -19,22 +30,22 @@ def get_token_url():
 
 
 def build_token_request_data(data):
-    return {
+    return encoded_dict({
         'grant_type': 'password',
         'client_id': OAUTH_CLIENT_ID,
         'client_secret': OAUTH_CLIENT_SECRET,
         'username': data.get('email'),
         'password': data.get('password')
-    }
+    })
 
 
 def build_refresh_token_request_data(data):
-    return {
+    return encoded_dict({
         'grant_type': 'refresh_token',
         'client_id': OAUTH_CLIENT_ID,
         'client_secret': OAUTH_CLIENT_SECRET,
         'refresh_token': data.get('token')
-    }
+    })
 
 
 def get_token_data(grant_type, data):
