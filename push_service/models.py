@@ -1,5 +1,6 @@
 # coding=utf-8
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from decider_app.models import User
 
@@ -28,10 +29,19 @@ class NotificationHistory(models.Model):
                 ('question_like', 'question_like'),
                 ('comment_like', 'comment_like'),
                 ('poll', 'poll'))
-    ACTIONS = (('new', 'new'),)
+    ACTIONS = (('new', 'new'),
+               ('new_many', 'new_many'),
+               ('like', 'like'),
+               ('like_many', 'like_many'),
+               ('inactive', 'inactive'),
+               ('vote', 'vote'))
+    TYPES = (('email', 'email'),
+             ('push', 'push'))
 
     client = models.ForeignKey(GcmClient)
     user = models.ForeignKey(User, null=True, blank=True)
     entity = models.CharField(max_length=255, choices=ENTITIES)
     entity_id = models.IntegerField()
     action = models.CharField(max_length=255, choices=ACTIONS)
+    date_created = models.DateTimeField(default=timezone.now)
+    type = models.CharField(max_length=255, choices=TYPES, default='push')

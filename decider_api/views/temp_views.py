@@ -168,3 +168,11 @@ def send_push(request):
         'data': 'data'
     }
     return gcm_helper.send_push(recipient, data, dry_run=dry_run)
+
+
+def clear_notification_history(request):
+    from push_service.models import NotificationHistory
+    objs = NotificationHistory.objects.all()
+    count = objs.count()
+    objs.delete()
+    return build_response(httplib.OK, CODE_OK, "Successfully cleared history", {'count': count})

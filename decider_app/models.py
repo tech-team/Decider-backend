@@ -1,13 +1,13 @@
 # coding=utf-8
 import hashlib
 import uuid
+from datetime import timedelta
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
-from push_service.tasks.comment_notification import comment_notification
 
 
 def get_random_uid():
@@ -138,7 +138,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     country = models.ForeignKey(Country, on_delete=models.SET_NULL, blank=True, null=True)
     city = models.CharField(_(u'Город'), max_length=50, blank=True)
     about = models.TextField(_(u'О себе'), max_length=1000, blank=True)
-    gender = models.NullBooleanField(_(u'Пол'), blank=True, null=True, default=False)
+    gender = models.NullBooleanField(_(u'Пол'), blank=True, null=True, default=None)
 
     avatar = models.OneToOneField(Picture, blank=True, null=True)
 
@@ -219,14 +219,21 @@ class Comment(models.Model):
 
     @staticmethod
     def comment_handler(sender, **kwargs):
+        from push_service.models import NotificationHistory
+        from push_service.tasks.comment_notification import comment_notification
         comment = kwargs.get('instance')
         question = comment.question
         user = question.author
+        new_comment_history = NotificationHistory.objects.filter(user_id=user.id, entity='comment', action='new')
+        recent_history = NotificationHistory.objects.filter(user_id=user.id,
+                                                            date_created__gt=timezone.now() - timedelta(minutes=30))
 
-        # if user != comment.author:
-        comment_notification.delay(user_id=user.id,
-                                   question_id=question.id,
-                                   comment_id=comment.id)
+        if not new_comment_history and user != comment.author:
+            if not recent_history:
+                comment_notification.apply_async((user.id, question.id, comment.id),)
+            else:
+                comment_notification.apply_async((user.id, question.id, comment.id),
+                                                 eta=timezone.now() + timedelta(minutes=30))
 
 class CommentLike(models.Model):
     class Meta:
@@ -241,6 +248,27 @@ class CommentLike(models.Model):
     def __unicode__(self):
         return "Like for comment #" + str(self.comment.id) + \
                ", question #" + str(self.question.id) + " by " + self.user.uid
+
+    @staticmethod
+    def comment_like_handler(sender, **kwargs):
+        from push_service.models import NotificationHistory
+        from push_service.tasks.comment_notification import comment_like_notification
+
+        comment_like = kwargs.get('instance')
+        liker = comment_like.user
+        comment = comment_like.comment
+        author = comment.author
+        question = comment.question
+        comment_like_history = NotificationHistory.objects.filter(user_id=author.id, entity='comment', action='like')
+        recent_history = NotificationHistory.objects.filter(user_id=author.id,
+                                                            date_created__gt=timezone.now() - timedelta(minutes=30))
+
+        if not comment_like_history and liker != author:
+            if not recent_history:
+                comment_like_notification.apply_async((author.id, question.id, comment.id),)
+            else:
+                comment_like_notification.apply_async((author.id, question.id, comment.id),
+                                                        eta=timezone.now() + timedelta(minutes=30))
 
 
 class Poll(models.Model):
@@ -289,6 +317,27 @@ class Vote(models.Model):
         return "Vote for poll item #" + str(self.poll_item.id) + \
                " for poll #" + str(self.poll.id) + " by user " + str(self.user.uid)
 
+    @staticmethod
+    def vote_handler(sender, **kwargs):
+        from push_service.models import NotificationHistory
+        from push_service.tasks.vote_notification import vote_notification
+
+        vote = kwargs.get('instance')
+        voter = vote.user
+        question = vote.poll.question
+        author = question.author
+
+        vote_history = NotificationHistory.objects.filter(user_id=author.id, entity='question', action='vote')
+        recent_history = NotificationHistory.objects.filter(user_id=author.id,
+                                                            date_created__gt=timezone.now() - timedelta(minutes=30))
+
+        if not vote_history and voter != author:
+            if not recent_history:
+                vote_notification.apply_async((author.id, question.id),)
+            else:
+                vote_notification.apply_async((author.id, question.id),
+                                              eta=timezone.now() + timedelta(minutes=30))
+
 
 class Locale(models.Model):
     class Meta:
@@ -319,3 +368,5 @@ class LocaleCategory(models.Model):
 
 
 post_save.connect(Comment.comment_handler, sender=Comment)
+post_save.connect(CommentLike.comment_like_handler, sender=CommentLike)
+post_save.connect(Vote.vote_handler, sender=Vote)
