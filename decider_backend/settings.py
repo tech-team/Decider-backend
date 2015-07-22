@@ -155,6 +155,7 @@ HOST_SCHEMA = get_config_opt(config, 'host', 'HOST_SCHEMA', 'http')
 HOST_ADDRESS = get_config_opt(config, 'host', 'HOST_ADDRESS', '0.0.0.0')
 HOST_PORT = get_config_opt(config, 'host', 'HOST_PORT', '31700')
 HOST_FULL_ADDRESS = urlparse.urlunparse((HOST_SCHEMA, HOST_ADDRESS + ':' + HOST_PORT, '', '', '', ''))
+HOST_URL = get_config_opt(config, 'host', 'HOST_URL', 'http://decidr.ru/')
 
 OAUTH_CLIENT_ID = get_config_opt(config, 'oauth', 'CLIENT_ID')
 OAUTH_CLIENT_SECRET = get_config_opt(config, 'oauth', 'CLIENT_SECRET')
