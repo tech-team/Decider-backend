@@ -1,4 +1,5 @@
 from django.db import connection
+from django.utils import timezone
 from decider_app.views.utils.response_codes import I_CODE_ALREADY_VOTED, I_CODE_UNKNOWN_ENTITY, \
     I_CODE_VOTE_OK
 
@@ -10,8 +11,10 @@ GET_QUERY = """ SELECT d_{0}.id as {0}_id, d_{0}_likes.id as like_id
                 WHERE d_{0}.id = {2};"""
 
 
-INSERT_QUERY = """INSERT INTO d_{0}_likes (user_id, {0}_id)
-                  VALUES ({1}, {2})"""
+INSERT_COMMENT_QUERY = """INSERT INTO d_comment_likes (user_id, comment_id, creation_date)
+                          VALUES ({0}, {1}, {2})"""
+INSERT_QUESTION_QUERY = """INSERT INTO d_question_likes (user_id, question_id)
+                           VALUES ({0}, {1})"""
 
 DELETE_QUERY = """DELETE FROM d_{0}_likes
                   WHERE user_id={1} AND {0}_id={2}"""
@@ -46,7 +49,10 @@ def get_vote(entity, entity_id, user_id):
 def insert_vote(entity, entity_id, user_id):
     cursor = connection.cursor()
 
-    cursor.execute(INSERT_QUERY.format(entity, user_id, entity_id))
+    if entity == 'question':
+        cursor.execute(INSERT_QUESTION_QUERY.format(entity, user_id, entity_id))
+    else:
+        cursor.execute(INSERT_COMMENT_QUERY.format(entity, user_id, entity_id, timezone.now()))
     cursor.execute(ENTITY_UPDATE_QUERY.format(entity, entity_id, "+"))
     cursor.execute(LIKES_QUERY.format(entity, entity_id))
     res = cursor.fetchone()
