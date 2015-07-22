@@ -56,8 +56,8 @@ class ShareEndpoint(ProtectedResourceView):
         if not pi:
             return build_error_response(httplib.NOT_FOUND, CODE_UNKNOWN_QUESTION, "Question unknown")
 
-        left_img = Image.open(os.path.join(MEDIA_ROOT, re.sub("media/?", "", pi[0].picture.url))).resize(self.SHARE_IMAGE_SIZE)
-        right_img = Image.open(os.path.join(MEDIA_ROOT, re.sub("media/?", "", pi[1].picture.url))).resize(self.SHARE_IMAGE_SIZE)
+        left_img = Image.open(os.path.join(MEDIA_ROOT, re.sub("media/?", "", pi[0].picture.preview_url))).resize(self.SHARE_IMAGE_SIZE)
+        right_img = Image.open(os.path.join(MEDIA_ROOT, re.sub("media/?", "", pi[1].picture.preview_url))).resize(self.SHARE_IMAGE_SIZE)
 
         bg.paste(left_img, self.OFFSETS[0])
         bg.paste(right_img, self.OFFSETS[1])
