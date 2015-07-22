@@ -5,7 +5,7 @@ from decider_backend.settings import GOOGLE_API_KEY
 
 SEND_ADDRESS = 'https://gcm-http.googleapis.com/gcm/send'
 
-def send_push(reg_id, notification, data, dry_run=True):
+def send_push(reg_id, notification, data, dry_run=False):
 
     session = requests.Session()
     request = requests.Request()
@@ -16,7 +16,7 @@ def send_push(reg_id, notification, data, dry_run=True):
 
     request_data = {
         'to': reg_id,
-        'registration_ids': [reg_id],
+        # 'registration_ids': [reg_id],
         'notification': notification,
         'data': data
     }
