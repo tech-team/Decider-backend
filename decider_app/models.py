@@ -219,8 +219,12 @@ class Comment(models.Model):
     @staticmethod
     def comment_handler(sender, **kwargs):
         comment = kwargs.get('instance')
-        comment_notification.delay(user_id=comment.question.author.id,
-                                   question_id=comment.question.id,
+        question = comment.question
+        user = question.author
+
+        # if user != comment.author:
+        comment_notification.delay(user_id=user.id,
+                                   question_id=question.id,
                                    comment_id=comment.id)
 
 class CommentLike(models.Model):

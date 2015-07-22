@@ -2,6 +2,7 @@
 from decider_api.log_manager import logger
 from decider_api.utils.gcm_helper import send_push
 from push_service.app import app
+from push_service.utils.notification_codes import CODE_NEW_COMMENT
 
 __author__ = 'snake'
 
@@ -9,16 +10,12 @@ __author__ = 'snake'
 @app.task()
 def comment_notification(user_id, question_id, comment_id):
     from push_service.models import GcmClient
-    print(user_id)
     receivers = GcmClient.objects.filter(user_id=user_id)
-    notification = {
-        'title': "Decider",
-        'msg': u"У вас новый комментарий!"
-    }
     data = {
+        'code': CODE_NEW_COMMENT,
         'question_id': question_id,
         'comment_id': comment_id
     }
     for receiver in receivers:
-        resp = send_push(receiver.registration_token, notification, data)
+        resp = send_push(receiver.registration_token, data)
         logger.error(resp)
