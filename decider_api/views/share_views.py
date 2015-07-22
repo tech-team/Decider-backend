@@ -41,7 +41,7 @@ class ShareEndpoint(ProtectedResourceView):
 
     # BORDER_SIZE = 15
     SHARE_IMAGE_SIZE = (360, 640)
-    OFFSETS = ((90, 44), (647, 44))
+    OFFSETS = ((290, 20), (847, 20))
 
     @require_params(['question_id'])
     def post(self, request, *args, **kwargs):

@@ -299,7 +299,7 @@ class QuestionDetailsEndpoint(ProtectedResourceView):
 @app.task()
 def create_share_image(question_id):
     share_image_size = (360, 640)
-    offsets = ((90, 44), (647, 44))
+    offsets = ((244, 2), (811, 2))
     question = Question.objects.get(id=question_id)
 
     bg = Image.open(os.path.join(STATIC_ROOT, "img", "share.png"))
