@@ -17,7 +17,7 @@ class PushAuthEndpoint(ProtectedResourceView):
         reg_token = request.POST.get('reg_token')
 
         instance, created = GcmClient.objects.get_or_create(instance_id=instance_id)
-        instance.reg_token = reg_token
+        instance.registration_token = reg_token
         instance.user = request.resource_owner
         instance.save()
 
