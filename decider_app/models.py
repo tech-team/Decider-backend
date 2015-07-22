@@ -189,7 +189,8 @@ class Question(models.Model):
 
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     likes = models.ManyToManyField(User, related_name="liked_questions")
-    category = models.ForeignKey(Category, null=True, on_delete=models.SET_NULL)
+    category = models.ForeignKey(Category, null=True, blank=True, on_delete=models.SET_NULL)
+    share_image = models.ForeignKey(Picture, null=True, blank=True)
 
     comments_count = models.IntegerField(_(u'Количество комментов'), default=0)
     likes_count = models.IntegerField(_(u'Количество лайков'), default=0)

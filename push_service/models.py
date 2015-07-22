@@ -17,3 +17,20 @@ class GcmClient(models.Model):
 
     def __unicode__(self):
         return self.instance_id
+
+
+class NotificationHistory(models.Model):
+    class Meta:
+        verbose_name = _(u'История рассылок')
+        db_table = "d_notification_history"
+
+    ENTITIES = (('comment', 'comment'),
+                ('question_like', 'question_like'),
+                ('comment_like', 'comment_like'),
+                ('poll', 'poll'))
+    ACTIONS = (('new', 'new'),)
+
+    client = models.ForeignKey(GcmClient)
+    entity = models.CharField(max_length=255, choices=ENTITIES)
+    entity_id = models.IntegerField()
+    action = models.CharField(max_length=255, choices=ACTIONS)
