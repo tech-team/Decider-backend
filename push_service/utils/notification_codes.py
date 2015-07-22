@@ -1,0 +1,3 @@
+
+
+CODE_NEW_COMMENT = 1000
