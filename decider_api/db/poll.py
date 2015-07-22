@@ -45,8 +45,8 @@ def check_poll_item(user_id, p_id, pi_id):
 def vote_on_poll(user_id, poll_id, poll_item_id):
     cursor = connection.cursor()
 
-    query = INSERT_QUERY.format(user_id, poll_id, poll_item_id, timezone.now())
-    cursor.execute(query)
+    from decider_app.models import Vote
+    Vote.objects.create(user_id=user_id, poll_id=poll_id, poll_item_id=poll_item_id)
 
     query = UPDATE_QUERY.format(poll_item_id)
     cursor.execute(query)

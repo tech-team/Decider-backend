@@ -11,8 +11,6 @@ GET_QUERY = """ SELECT d_{0}.id as {0}_id, d_{0}_likes.id as like_id
                 WHERE d_{0}.id = {2};"""
 
 
-INSERT_COMMENT_QUERY = """INSERT INTO d_comment_likes (user_id, comment_id, creation_date)
-                          VALUES ({0}, {1}, {2})"""
 INSERT_QUESTION_QUERY = """INSERT INTO d_question_likes (user_id, question_id)
                            VALUES ({0}, {1})"""
 
@@ -52,7 +50,8 @@ def insert_vote(entity, entity_id, user_id):
     if entity == 'question':
         cursor.execute(INSERT_QUESTION_QUERY.format(entity, user_id, entity_id))
     else:
-        cursor.execute(INSERT_COMMENT_QUERY.format(entity, user_id, entity_id, timezone.now()))
+        from decider_app.models import CommentLike
+        CommentLike.objects.create(user_id=user_id, comment_id=entity_id)
     cursor.execute(ENTITY_UPDATE_QUERY.format(entity, entity_id, "+"))
     cursor.execute(LIKES_QUERY.format(entity, entity_id))
     res = cursor.fetchone()
