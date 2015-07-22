@@ -52,8 +52,10 @@ def require_post_data(*params):
 def track_activity(func):
     def wrapped(request, *args, **kwargs):
         if hasattr(request, 'request') and hasattr(request.request, 'resource_owner'):
+            from push_service.models import NotificationHistory
             user = request.request.resource_owner
             user.update_last_active()
+            NotificationHistory.objects.filter(user_id=user.id).delete()
         return func(request, *args, **kwargs)
     return wrapped
 

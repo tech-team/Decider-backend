@@ -21,6 +21,7 @@ def get_image_view(request, question_id):
             with open(os.path.join(MEDIA_ROOT, re.sub("media/?", "", image.url)), "rb") as f:
                 return HttpResponse(f.read(), content_type="image/jpeg")
         else:
+            # TODO: create image here
             return HttpResponseNotFound()
     except ObjectDoesNotExist:
         return HttpResponseNotFound()

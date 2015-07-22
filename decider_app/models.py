@@ -236,6 +236,7 @@ class CommentLike(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
+    creation_date = models.DateTimeField(_(u'Дата создания'), default=timezone.now)
 
     def __unicode__(self):
         return "Like for comment #" + str(self.comment.id) + \
@@ -282,6 +283,7 @@ class Vote(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     poll_item = models.ForeignKey(PollItem, on_delete=models.CASCADE)
     poll = models.ForeignKey(Poll, on_delete=models.CASCADE)
+    creation_date = models.DateTimeField(_(u'Дата создания'), default=timezone.now)
 
     def __unicode__(self):
         return "Vote for poll item #" + str(self.poll_item.id) + \
