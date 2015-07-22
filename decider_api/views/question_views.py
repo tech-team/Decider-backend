@@ -311,8 +311,8 @@ def create_share_image(question_id):
     if not pi:
         return build_error_response(httplib.NOT_FOUND, CODE_UNKNOWN_QUESTION, "Question unknown")
 
-    left_img = Image.open(os.path.join(MEDIA_ROOT, re.sub("media/?", "", pi[0].picture.url))).resize(share_image_size)
-    right_img = Image.open(os.path.join(MEDIA_ROOT, re.sub("media/?", "", pi[1].picture.url))).resize(share_image_size)
+    left_img = Image.open(os.path.join(MEDIA_ROOT, re.sub("media/?", "", pi[0].picture.preview_url))).resize(share_image_size)
+    right_img = Image.open(os.path.join(MEDIA_ROOT, re.sub("media/?", "", pi[1].picture.preview_url))).resize(share_image_size)
 
     bg.paste(left_img, offsets[0])
     bg.paste(right_img, offsets[1])
