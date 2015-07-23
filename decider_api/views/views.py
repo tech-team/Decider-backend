@@ -15,7 +15,7 @@ class SpamEndpoint(ProtectedResourceView):
     @track_activity
     def post(self, request, *args, **kwargs):
         entity = request.POST.get('entity')
-        entity_id = request.POST.get('entity_id')
+        entity_id = int(request.POST.get('entity_id'))
 
         if entity not in ['comment', 'question']:
             return build_error_response(httplib.BAD_REQUEST, CODE_INVALID_ENTITY, "Invalid entity")
