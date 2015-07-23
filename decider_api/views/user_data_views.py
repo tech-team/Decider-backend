@@ -61,7 +61,7 @@ class UserDataEndpoint(ProtectedResourceView):
                 return build_error_response(httplib.BAD_REQUEST, CODE_USERNAME_TAKEN,
                                             "Username taken")
             else:
-                user.username = username
+                user.username = username[:20]
 
         for field in ['first_name', 'last_name', 'city', 'about']:
             value = request.POST.get(field)

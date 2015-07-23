@@ -129,8 +129,11 @@ def social_complete(request):
                 response['Location'] += '?access_token=' + data.get('access_token') + \
                                         '&expires=' + str(data.get('expires')) + \
                                         '&refresh_token=' + data.get('refresh_token') + \
-                                        '&user_id=' + request.user.uid + \
-                                        '&reg=' + ('1' if request.user.registration_finished() else '0')
+                                        '&user_id=' + request.user.uid
+                if request.user.registration_finished():
+                    response['Location'] += '&reg=1&username=' + request.user.username
+                else:
+                    response['Location'] += '&reg=0'
 
                 return response
             else:
