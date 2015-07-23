@@ -25,6 +25,6 @@ CELERY_IMPORTS = ('decider_api.views.question_views', 'push_service.tasks.commen
 CELERYBEAT_SCHEDULE = {
     'many': {
         'task': 'push_service.tasks.periodic_tasks.send_periodic_notifications',
-        'schedule': timedelta(seconds=30)
+        'schedule': timedelta(hours=6)
     }
 }
