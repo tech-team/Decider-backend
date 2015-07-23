@@ -25,9 +25,6 @@ def login_view(request):
         user = authenticate(email=email, password=password)
         if not user:
             return build_error_response(httplib.BAD_REQUEST, CODE_INVALID_CREDENTIALS, 'Invalid credentials')
-        elif not user.registration_finished():
-            return build_error_response(httplib.BAD_REQUEST, CODE_REGISTRATION_UNFINISHED,
-                                        "Registration unfinished")
         else:
             data = get_token_data(
                 'password',
@@ -40,7 +37,10 @@ def login_view(request):
                 return build_error_response(httplib.INTERNAL_SERVER_ERROR, CODE_LOGIN_FAILED, "Login failed")
             else:
                 data.update({'user': get_user_data(user, force_deanon=True)})
-                return build_response(httplib.OK, CODE_OK, "Login successful", data)
+                if user.registration_finished():
+                    return build_response(httplib.OK, CODE_OK, "Login successful", data)
+                else:
+                    return build_response(httplib.OK, CODE_REGISTRATION_UNFINISHED, "Registration unfinished", data)
     else:
         return build_error_response(httplib.BAD_REQUEST, CODE_INSUFFICIENT_CREDENTIALS, 'Some fields are not filled')
 
@@ -75,8 +75,11 @@ def registration_view(request):
         if not data:
             return build_error_response(httplib.INTERNAL_SERVER_ERROR, CODE_LOGIN_FAILED, "Registration failed")
         else:
-            data.update({'user': get_user_data(user)})
-            return build_response(httplib.OK, CODE_OK, "Registration successful", data)
+            data.update({'user': get_user_data(user, force_deanon=True)})
+            if user.registration_finished():
+                return build_response(httplib.OK, CODE_OK, "Registration successful", data)
+            else:
+                return build_response(httplib.OK, CODE_REGISTRATION_UNFINISHED, "Registration unfinished", data)
 
     else:
         return build_error_response(httplib.BAD_REQUEST, CODE_INSUFFICIENT_CREDENTIALS,
@@ -126,7 +129,9 @@ def social_complete(request):
                 response['Location'] += '?access_token=' + data.get('access_token') + \
                                         '&expires=' + str(data.get('expires')) + \
                                         '&refresh_token=' + data.get('refresh_token') + \
-                                        '&user_id=' + request.user.uid
+                                        '&user_id=' + request.user.uid + \
+                                        '&reg=' + ('1' if request.user.registration_finished() else '0')
+
                 return response
             else:
                 return render(request, 'social_login.html', {'text': 'You need to login again'})
