@@ -19,12 +19,12 @@ CELERY_TASK_TIME_LIMIT = 20
 CELERY_TASK_SOFT_TIME_LIMIT = 10
 
 CELERY_IMPORTS = ('decider_api.views.question_views', 'push_service.tasks.comment_notification',
-                  'push_service.tasks.vote_notification')
+                  'push_service.tasks.vote_notification', 'push_service.tasks.periodic_tasks')
 # CELERY_TIMEZONE = 'Europe/Moscow'
 
 CELERYBEAT_SCHEDULE = {
-    # 'test': {
-    #     'task': 'push_service.tasks.test_periodic',
-    #     'schedule': timedelta(seconds=60)
-    # }
+    'many': {
+        'task': 'push_service.tasks.periodic_tasks.send_periodic_notifications',
+        'schedule': timedelta(seconds=30)
+    }
 }

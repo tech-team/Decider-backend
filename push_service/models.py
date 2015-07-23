@@ -34,14 +34,15 @@ class NotificationHistory(models.Model):
                ('like', 'like'),
                ('like_many', 'like_many'),
                ('inactive', 'inactive'),
-               ('vote', 'vote'))
+               ('vote', 'vote'),
+               ('vote_many', 'vote_many'))
     TYPES = (('email', 'email'),
              ('push', 'push'))
 
     client = models.ForeignKey(GcmClient)
     user = models.ForeignKey(User, null=True, blank=True)
     entity = models.CharField(max_length=255, choices=ENTITIES)
-    entity_id = models.IntegerField()
+    entity_id = models.IntegerField(null=True, blank=True)
     action = models.CharField(max_length=255, choices=ACTIONS)
     date_created = models.DateTimeField(default=timezone.now)
     type = models.CharField(max_length=255, choices=TYPES, default='push')

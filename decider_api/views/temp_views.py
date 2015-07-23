@@ -176,3 +176,16 @@ def clear_notification_history(request):
     count = objs.count()
     objs.delete()
     return build_response(httplib.OK, CODE_OK, "Successfully cleared history", {'count': count})
+
+
+def send_periodic(request):
+    from push_service.tasks.vote_notification import many_votes_notification
+    from push_service.tasks.comment_notification import many_comments_notification
+
+    q_id = int(request.POST.get('question_id'))
+    count = int(request.POST.get('count'))
+    question = Question.objects.get(id=q_id)
+
+    many_votes_notification.apply_async((question.author_id, q_id, count),)
+    many_comments_notification.apply_async((question.author_id, q_id, count),)
+    return build_response(httplib.OK, CODE_OK, "Sent")

@@ -1,44 +1,21 @@
 # coding=utf-8
-from decider_api.log_manager import logger
-from decider_api.utils.gcm_helper import send_push
 from push_service.app import app
-from push_service.utils.notification_codes import CODE_NEW_COMMENT, CODE_NEW_COMMENT_LIKE
-
-__author__ = 'snake'
+from push_service.utils.notification_codes import CODE_NEW_COMMENT, CODE_NEW_COMMENT_LIKE, CODE_MANY_COMMENTS
+from push_service.utils.notification_helper import send_notification
 
 
 @app.task()
 def comment_notification(user_id, question_id, comment_id):
-    from push_service.models import NotificationHistory, GcmClient
-
-    receivers = GcmClient.objects.filter(user_id=user_id)
-    data = {
-        'code': CODE_NEW_COMMENT,
-        'question_id': question_id,
-        'comment_id': comment_id
-    }
-    for receiver in receivers:
-        if NotificationHistory.objects.filter(client=receiver, entity='comment', action='new').count() == 0:
-            NotificationHistory.objects.create(client=receiver, entity='comment', action='new', entity_id=comment_id,
-                                               user_id=user_id)
-            resp = send_push(receiver.registration_token, data)
-            logger.error(resp)
+    send_notification(CODE_NEW_COMMENT, 'new', 'comment', comment_id, user_id, question_id=question_id)
 
 
 @app.task()
 def comment_like_notification(user_id, question_id, comment_id):
-    from push_service.models import NotificationHistory, GcmClient
+    send_notification(CODE_NEW_COMMENT_LIKE, 'like', 'comment', comment_id, user_id, question_id=question_id,
+                                                                                     comment_id=comment_id)
 
-    receivers = GcmClient.objects.filter(user_id=user_id)
-    data = {
-        'code': CODE_NEW_COMMENT_LIKE,
-        'question_id': question_id,
-        'comment_id': comment_id
-    }
-    for receiver in receivers:
-        if NotificationHistory.objects.filter(client=receiver, entity='comment', action='like').count() == 0:
-            NotificationHistory.objects.create(client=receiver, entity='comment', action='like', entity_id=comment_id,
-                                               user_id=user_id)
-            resp = send_push(receiver.registration_token, data)
-            logger.error(resp)
 
+@app.task()
+def many_comments_notification(user_id, question_id, comments_num):
+    send_notification(CODE_MANY_COMMENTS, 'new_many', 'comment', None, user_id, question_id=question_id,
+                                                                                count=comments_num)
