@@ -113,7 +113,7 @@ class CommentsEndpoint(ProtectedResourceView):
             except:
                 last_seen_id = None
 
-            comments = list(Comment.objects.filter(id__gte=last_seen_id, question=question).order_by('id')) \
+            comments = list(Comment.objects.filter(id__gt=last_seen_id, question=question).order_by('id')) \
                        if last_seen_id \
                        else [comment]
 

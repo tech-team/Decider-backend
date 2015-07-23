@@ -48,7 +48,7 @@ def insert_vote(entity, entity_id, user_id):
     cursor = connection.cursor()
 
     if entity == 'question':
-        cursor.execute(INSERT_QUESTION_QUERY.format(entity, user_id, entity_id))
+        cursor.execute(INSERT_QUESTION_QUERY.format(user_id, entity_id))
     else:
         from decider_app.models import CommentLike
         CommentLike.objects.create(user_id=user_id, comment_id=entity_id)
