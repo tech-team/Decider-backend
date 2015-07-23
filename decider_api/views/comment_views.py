@@ -1,5 +1,6 @@
 import httplib
 import json
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from oauth2_provider.views import ProtectedResourceView
 from decider_api.db.comments import get_comments
@@ -44,6 +45,12 @@ class CommentsEndpoint(ProtectedResourceView):
             return build_error_response(httplib.BAD_REQUEST, CODE_INVALID_DATA,
                                         "Some fields are invalid", errors)
 
+        try:
+            question = Question.objects.get(id=int(params['question_id']))
+        except ObjectDoesNotExist:
+            return build_error_response(httplib.BAD_REQUEST, CODE_UNKNOWN_QUESTION,
+                                        "Question is unknown")
+
         comments_list, c_columns = get_comments(request.resource_owner.id, params['question_id'],
                                                 order=order,
                                                 limit=params['limit'], offset=params['offset'])
@@ -62,9 +69,12 @@ class CommentsEndpoint(ProtectedResourceView):
                 'question_id': comment_row[c_columns.index('question_id')]
             })
 
-        remaining = Question.objects.get(id=int(params['question_id'])).comments_count \
-                    - (int(params['offset']) if params.get('offset') else 0) \
-                    - (int(params['limit']) if params.get('limit') else 0)
+        if not comments_list:
+            remaining = 0
+        else:
+            remaining = question.comments_count \
+                        - (int(params['offset']) if params.get('offset') else 0) \
+                        - (int(params['limit']) if params.get('limit') else 0)
         data = {
             'remaining': remaining if remaining >= 0 else 0,
             'comments': comments
@@ -113,7 +123,7 @@ class CommentsEndpoint(ProtectedResourceView):
             except:
                 last_seen_id = None
 
-            comments = list(Comment.objects.filter(id__gt=last_seen_id, question=question).order_by('id')) \
+            comments = list(Comment.objects.filter(id__gt=last_seen_id, question=question, is_active=True).order_by('id')) \
                        if last_seen_id \
                        else [comment]
 

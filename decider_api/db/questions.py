@@ -8,7 +8,7 @@ def tab_switch(case):
         "my": get_my_questions
     }.get(case, None)
 
-QUERY = """SELECT d_question.id, d_question.text, d_question.creation_date,
+QUERY = """SELECT d_question.id, d_question.text, d_question.creation_date, d_question.is_active,
                   d_question.category_id, d_poll.id as poll_id, d_question.author_id,
                   d_question.likes_count, d_question.comments_count, d_question.is_anonymous,
                   d_user.first_name as author_first_name, d_user.last_name as author_last_name,
@@ -26,7 +26,7 @@ QUERY = """SELECT d_question.id, d_question.text, d_question.creation_date,
 
 
 
-WHERE = " WHERE 1=1"
+WHERE = " WHERE d_question.is_active=TRUE"
 
 GROUP_BY = " GROUP BY d_question.id, d_poll.id, d_user.id, d_picture.url, d_question_likes.id"
 

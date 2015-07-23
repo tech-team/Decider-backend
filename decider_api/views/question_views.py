@@ -249,7 +249,8 @@ class QuestionDetailsEndpoint(ProtectedResourceView):
                 'author': get_short_user_row_data(question_row, q_columns, 'author', is_anonymous, force_deanon),
                 'likes_count': question_row[q_columns.index('likes_count')],
                 'is_anonymous': is_anonymous,
-                'voted': True if question_row[q_columns.index('voted')] else False
+                'voted': True if question_row[q_columns.index('voted')] else False,
+                'is_active': True if str2bool(question_row[q_columns.index('is_active')]) else False
             }
 
             poll_id = question_row[q_columns.index('poll_id')]

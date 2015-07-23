@@ -12,7 +12,7 @@ SELECT_QUERY = """ SELECT d_comment.id, d_comment.text, d_comment.creation_date,
                    LEFT JOIN d_picture as author_picture ON author_picture.id = author_user.avatar_id
                    LEFT JOIN d_comment_likes ON d_comment_likes.user_id = {0}
                          AND d_comment_likes.comment_id = d_comment.id
-                   WHERE d_comment.question_id = {1}"""
+                   WHERE d_comment.question_id = {1} AND d_comment.is_active=TRUE"""
 
 
 def get_comments(user_id, q_id, order=None, limit=None, offset=None):

@@ -7,6 +7,7 @@ from decider_api.views.poll_views import PollEndpoint
 from decider_api.views.question_views import QuestionsEndpoint, QuestionDetailsEndpoint
 from decider_api.views.share_views import ShareEndpoint
 from decider_api.views.user_data_views import UserDataEndpoint
+from decider_api.views.views import SpamEndpoint
 from decider_api.views.vote_views import VoteEndpoint
 
 urlpatterns = patterns('',
@@ -30,6 +31,7 @@ urlpatterns = patterns('',
     url(r'^comments/?$', CommentsEndpoint.as_view(), name="comments"),
     url(r'^vote/?$', VoteEndpoint.as_view(), name="vote"),
 
+    url(r'^spam/?$', SpamEndpoint.as_view(), name="spam"),
     # url(r'^share/?$', ShareEndpoint.as_view(), name="share"),
 
     url(r'^logout/?$', auth_views.logout_view, name="logout_view"),

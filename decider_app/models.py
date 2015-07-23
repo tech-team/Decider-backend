@@ -195,6 +195,9 @@ class Question(models.Model):
     comments_count = models.IntegerField(_(u'Количество комментов'), default=0)
     likes_count = models.IntegerField(_(u'Количество лайков'), default=0)
 
+    is_active = models.BooleanField(default=True)
+    spam_count = models.PositiveIntegerField(default=0)
+
     def __unicode__(self):
         return "Question #" + str(self.id) + " by " + self.author.uid
 
@@ -213,6 +216,9 @@ class Comment(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, null=True)
     likes_count = models.IntegerField(_(u'Количество лайков'), default=0)
     likes = models.ManyToManyField(User, related_name="liked_comments", through="CommentLike")
+
+    is_active = models.BooleanField(default=True)
+    spam_count = models.PositiveIntegerField(default=0)
 
     def __unicode__(self):
         return "Comment #" + str(self.id) + " by " + self.author.uid
