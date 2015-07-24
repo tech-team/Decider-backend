@@ -21,10 +21,10 @@ class UserDataEndpoint(ProtectedResourceView):
         try:
             try:
                 if not kwargs.get('user_id'):
-                    user_id = request.resource_owner.id
+                    user_id = request.resource_owner.uid
                 else:
                     user_id = int(kwargs.get('user_id'))
-                    if user_id != request.resource_owner.id and not request.resource_owner.registration_finished():
+                    if user_id != request.resource_owner.uid and not request.resource_owner.registration_finished():
                         return build_error_response(httplib.BAD_REQUEST, CODE_REGISTRATION_UNFINISHED,
                                                     "Registration unfinished")
 
@@ -36,7 +36,7 @@ class UserDataEndpoint(ProtectedResourceView):
                                             "Some fields are invalid", ['user_id'])
 
             try:
-                user = User.objects.get(id=user_id)
+                user = User.objects.get(uid=user_id)
             except User.DoesNotExist:
                 return build_error_response(httplib.NOT_FOUND, CODE_UNKNOWN_USER,
                                             "No user with specified id")
