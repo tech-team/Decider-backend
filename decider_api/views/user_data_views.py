@@ -20,16 +20,14 @@ class UserDataEndpoint(ProtectedResourceView):
     def get(self, request, *args, **kwargs):
         try:
             try:
-                if not kwargs.get('user_id'):
+                user_id = request.GET.get('user_id')
+                if not user_id:
                     user_id = request.resource_owner.uid
                 else:
-                    user_id = int(kwargs.get('user_id'))
                     if user_id != request.resource_owner.uid and not request.resource_owner.registration_finished():
                         return build_error_response(httplib.BAD_REQUEST, CODE_REGISTRATION_UNFINISHED,
                                                     "Registration unfinished")
 
-                if not user_id:
-                    raise ValueError('Error: user_id is ' + str(user_id))
             except Exception as e:
                 logger.exception(e)
                 return build_error_response(httplib.BAD_REQUEST, CODE_INVALID_DATA,
