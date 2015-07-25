@@ -1,4 +1,3 @@
-from time import strftime, timezone
 import datetime
 
 BACKENDS = {

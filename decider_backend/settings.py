@@ -14,7 +14,7 @@ import logging
 import urlparse
 from django.core.urlresolvers import reverse, reverse_lazy
 import os
-
+from decider_api.utils.helper import str2bool
 
 PROJECT_NAME = 'decider'
 APP_NAME = 'decider_app'
@@ -45,7 +45,7 @@ config.read(os.path.join("conf", PROJECT_NAME + ".conf"))
 SECRET_KEY = get_config_opt(config, 'django', 'SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True if get_config_opt(config, 'common', 'DEBUG', 'True') == 'True' else False
+DEBUG = str2bool(get_config_opt(config, 'common', 'DEBUG', 'True'))
 
 TEMPLATE_DEBUG = True
 
@@ -291,3 +291,5 @@ RABBITMQ_PASS = get_config_opt(config, 'celery', 'RABBITMQ_PASS')
 RABBITMQ_HOST = get_config_opt(config, 'celery', 'RABBITMQ_HOST')
 RABBITMQ_PORT = get_config_opt(config, 'celery', 'RABBITMQ_PORT')
 RABBITMQ_VHOST = get_config_opt(config, 'celery', 'RABBITMQ_VHOST')
+
+TEMP_URLS = DEBUG or str2bool(get_config_opt(config, 'common', 'temp_urls', 'True'))

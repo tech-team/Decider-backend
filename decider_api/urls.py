@@ -9,6 +9,7 @@ from decider_api.views.share_views import ShareEndpoint
 from decider_api.views.user_data_views import UserDataEndpoint
 from decider_api.views.views import SpamEndpoint
 from decider_api.views.vote_views import VoteEndpoint
+from decider_backend.settings import TEMP_URLS
 
 urlpatterns = patterns('',
     url(r'^social/', include('social.apps.django_app.urls', namespace='social')),
@@ -35,11 +36,13 @@ urlpatterns = patterns('',
     # url(r'^share/?$', ShareEndpoint.as_view(), name="share"),
 
     url(r'^logout/?$', auth_views.logout_view, name="logout_view"),
-
-    # TODO: remove tmp
-    url(r'^tmp/send_push/?$', temp_views.send_push, name="send_push"),
-    url(r'^tmp/send_periodic/?$', temp_views.send_periodic, name="send_periodic"),
-    url(r'^tmp/fill_db/?$', temp_views.fill_db, name="fill_db"),
-    url(r'^tmp/delete_entity/?$', temp_views.delete_entity, name="delete_question"),
-    url(r'^tmp/clear_notification_history/?$', temp_views.clear_notification_history),
 )
+
+if TEMP_URLS:
+    urlpatterns += (
+        url(r'^tmp/send_push/?$', temp_views.send_push, name="send_push"),
+        url(r'^tmp/send_periodic/?$', temp_views.send_periodic, name="send_periodic"),
+        # url(r'^tmp/fill_db/?$', temp_views.fill_db, name="fill_db"),
+        url(r'^tmp/delete_entity/?$', temp_views.delete_entity, name="delete_question"),
+        url(r'^tmp/clear_notification_history/?$', temp_views.clear_notification_history),
+    )

@@ -160,12 +160,10 @@ def send_push(request):
     msg = request.POST.get('msg')
     dry_run = str2bool(request.POST.get('dry_run'))
 
-    notification = {
-        'title': title,
-        'body': msg
-    }
     data = {
-        'data': 'data'
+        'code': 0,
+        'title': title,
+        'msg': msg
     }
     return gcm_helper.send_push(recipient, data, dry_run=dry_run)
 
