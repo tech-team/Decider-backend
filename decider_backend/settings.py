@@ -292,4 +292,4 @@ RABBITMQ_HOST = get_config_opt(config, 'celery', 'RABBITMQ_HOST')
 RABBITMQ_PORT = get_config_opt(config, 'celery', 'RABBITMQ_PORT')
 RABBITMQ_VHOST = get_config_opt(config, 'celery', 'RABBITMQ_VHOST')
 
-TEMP_URLS = DEBUG or str2bool(get_config_opt(config, 'common', 'temp_urls', 'True'))
+TEMP_URLS = DEBUG or str2bool(get_config_opt(config, 'common', 'TEMP_URLS', 'True'))
