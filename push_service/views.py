@@ -16,10 +16,14 @@ class PushAuthEndpoint(ProtectedResourceView):
         instance_id = request.POST.get('instance_id')
         reg_token = request.POST.get('reg_token')
 
-        instance, created = GcmClient.objects.get_or_create(instance_id=instance_id)
-        instance.registration_token = reg_token
-        instance.user = request.resource_owner
-        instance.save()
+        try:
+            instance = GcmClient.objects.get(registration_token=reg_token)
+            instance.instance_id = instance_id
+            instance.user = request.resource_owner
+            instance.save()
+        except ObjectDoesNotExist:
+            GcmClient.objects.create(instance_id=instance_id, registration_token=reg_token,
+                                     user=request.resource_owner)
 
         return build_response(httplib.CREATED, CODE_CREATED, "Authorization successful")
 

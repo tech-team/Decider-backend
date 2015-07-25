@@ -120,6 +120,8 @@ def social_complete(request):
         request.user.update_last_active()
         if 'access_token' in request.GET:
             return render(request, 'social_login.html', {'text': 'Login successful'})
+        elif request.GET.get('canceled'):
+            return render(request, 'social_login.html', {'text': 'Login canceled'})
         else:
             data = request.session.get('access_token')
             if data:
