@@ -252,8 +252,7 @@ class CommentLike(models.Model):
     creation_date = models.DateTimeField(_(u'Дата создания'), default=timezone.now)
 
     def __unicode__(self):
-        return "Like for comment #" + str(self.comment.id) + \
-               ", question #" + str(self.question.id) + " by " + self.user.uid
+        return "Like for comment #" + str(self.comment.id)
 
     @staticmethod
     def comment_like_handler(sender, **kwargs):
