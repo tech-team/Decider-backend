@@ -373,6 +373,20 @@ class LocaleCategory(models.Model):
         return "Locale " + self.locale.name + " for category " + str(self.category.id)
 
 
+class SpamReport(models.Model):
+    class Meta:
+        verbose_name = _(u'Пометка о спаме')
+        verbose_name_plural = _(u'Пометки о спаме')
+        db_table = "d_spam_report"
+
+    ENTITIES = (('question', 'question'),
+                ('comment', 'comment'))
+
+    entity = models.CharField(max_length=255, choices=ENTITIES)
+    entity_id = models.PositiveIntegerField()
+    user = models.ForeignKey(User)
+
+
 post_save.connect(Comment.comment_handler, sender=Comment)
 post_save.connect(CommentLike.comment_like_handler, sender=CommentLike)
 post_save.connect(Vote.vote_handler, sender=Vote)
