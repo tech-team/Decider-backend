@@ -116,12 +116,12 @@ def social_login(request, provider):
         return render(request, 'social_login.html', {'text': 'Backend not supported'})
 
 def social_complete(request):
-    if request.user.is_authenticated():
+    if request.GET.get('canceled'):
+        return render(request, 'social_login.html', {'text': 'Login canceled'})
+    elif request.user.is_authenticated():
         request.user.update_last_active()
         if 'access_token' in request.GET:
             return render(request, 'social_login.html', {'text': 'Login successful'})
-        elif request.GET.get('canceled'):
-            return render(request, 'social_login.html', {'text': 'Login canceled'})
         else:
             data = request.session.get('access_token')
             if data:
