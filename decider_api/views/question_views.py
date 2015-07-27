@@ -29,6 +29,9 @@ class QuestionsEndpoint(ProtectedResourceView):
             tab = request.GET.get('tab')
             limit = request.GET.get('limit')
             offset = request.GET.get('offset')
+            first_question_id = request.GET.get('first_question_id')
+            if first_question_id:
+                first_question_id = int(first_question_id)
             categories = request.GET.getlist('categories[]')
 
             errors = []
@@ -68,7 +71,8 @@ class QuestionsEndpoint(ProtectedResourceView):
             question_list, q_columns = tab_func(user_id=request.resource_owner.id,
                                                 limit=limit,
                                                 offset=offset,
-                                                categories=categories)
+                                                categories=categories,
+                                                first_question_id=first_question_id)
             questions = []
             polls = []
             for question_row in question_list:

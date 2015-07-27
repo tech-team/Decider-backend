@@ -33,8 +33,12 @@ GROUP_BY = " GROUP BY d_question.id, d_poll.id, d_user.id, d_picture.url, d_ques
 
 def get_questions(*args, **kwargs):
     cursor = connection.cursor()
+    where = WHERE
+    fqid = kwargs.get('first_question_id')
+    if fqid > -1:
+        where += " AND d_question.id < {0}".format(fqid)
 
-    query = QUERY.format(kwargs.get('user_id')) + WHERE
+    query = QUERY.format(kwargs.get('user_id')) + where
     if kwargs.get('categories'):
         category_ids = (', '.join([str(x) for x in kwargs.get('categories')]))
         query += ' AND d_question.category_id IN (%s)' % category_ids
@@ -62,7 +66,8 @@ def get_new_questions(*args, **kwargs):
     extras = GROUP_BY + " ORDER BY d_question.creation_date DESC"
     return get_questions(user_id=kwargs.get('user_id'),
                          limit=kwargs.get('limit'), offset=kwargs.get('offset'),
-                         categories=kwargs.get('categories'), extras=extras)
+                         categories=kwargs.get('categories'), extras=extras,
+                         first_question_id=kwargs.get('first_question_id'))
 
 
 def get_popular_questions(*args, **kwargs):
@@ -77,7 +82,8 @@ def get_my_questions(*args, **kwargs):
     extras = GROUP_BY + " ORDER BY d_question.creation_date DESC"
     return get_questions(user_id=kwargs.get('user_id'),
                          limit=kwargs.get('limit'), offset=kwargs.get('offset'),
-                         categories=kwargs.get('categories'), where=where, extras=extras)
+                         categories=kwargs.get('categories'), where=where, extras=extras,
+                         first_question_id=kwargs.get('first_question_id'))
 
 
 def get_question(user_id, q_id):
