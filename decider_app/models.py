@@ -79,6 +79,7 @@ class Country(models.Model):
         verbose_name_plural = _(u'Страны')
         ordering = ('name', )
         db_table = "d_country"
+        select_on_save = True
 
     name = models.CharField(max_length=100, verbose_name=u'Название')
 

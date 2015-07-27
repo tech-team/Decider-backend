@@ -24,11 +24,7 @@ def get_additional_data(user, access_token):
     photo_url = data.get('photo_max')
 
     if country:
-        try:
-            user_country = get_model('decider_app', 'country').objects.get(name=country.get('title'))
-            user.country = user_country
-        except ObjectDoesNotExist:
-            pass
+        user.country, created = get_model('decider_app', 'country').objects.get_or_create(name=country.get('title'))
 
     if city:
         user.city = city.get('title')

@@ -72,12 +72,7 @@ class UserDataEndpoint(ProtectedResourceView):
 
         country = request.POST.get('country')
         if country is not None:
-            try:
-                db_country = get_model('decider_app', 'country').objects.get(name=country)
-                user.country = db_country
-            except ObjectDoesNotExist:
-                user.country = None
-                pass
+            user.country, created = get_model('decider_app', 'country').objects.get_or_create(name=country)
 
         birthday = request.POST.get('birthday')
         if birthday is not None:
